@@ -85,3 +85,20 @@ double psi_l(double x, int l, const NumericVector& u){
     }
   }
 }
+
+// Monotone single index function as a B-Spline basis expansion.
+// g(x) = \sum_{l=0}^L \xi_l * \psi_l(x)
+// Here, u is a vector of specified knots from -1 to 1
+// [[Rcpp::export]]
+double g(double x, const NumericVector& xi, const NumericVector& u){
+  if(x > 1.0)
+    return(g(1.0, xi, u)) ;   // If x>1, g(x) = g(1)
+  else if(x < -1.0)
+    return(0.0) ;     // If x<-1, g(x) = g(0)
+  else{
+    double res=0.0 ;
+    for(int l=0; l<xi.size();l++)
+      res += xi[l]*psi_l(x,l,u) ;     // For -1<=x<=1, g(x) = \sum_{l=0}^L \xi_l * \psi_l(x)
+    return(res) ;
+  }
+}
