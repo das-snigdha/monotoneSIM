@@ -102,3 +102,18 @@ double g(double x, const NumericVector& xi, const NumericVector& u){
     return(res) ;
   }
 }
+
+// log likelihood function of beta
+// log_L =  -(1/2*\sigma_sq_eps) \sum_{i=1}^n (y_i - g(X_i^{\top}\beta))^2
+double log_L(const NumericVector& y, const NumericVector& Xbeta,
+             const NumericVector& xi, double sigma_sq_eps, const NumericVector& u){
+  double res=0.0, tmp ;
+  for(int i=0; i<y.size(); i++){
+    // res = \sum_{i=1}^n (y_i - g(X_i^{\top}\beta))^2
+
+    tmp = y[i] - g(Xbeta[i], xi, u) ;
+    res += tmp*tmp ;
+  }
+  res = -0.5*res/sigma_sq_eps ;     // multiplying res by -(1/2*\sigma_sq_eps) to get log_L as defined
+  return(res) ;
+}
