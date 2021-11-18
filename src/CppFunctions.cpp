@@ -48,3 +48,40 @@ double psi(double x){
   else
     return(1.0) ;   // return 1 if x >= 1
 }
+
+// psi_l(x) = \int_{-1}^x h_l(t) dt
+double psi_l(double x, int l, const NumericVector& u){
+  if(l==0){
+    // specific algerba for psi_0
+    if(x <= -1)
+      return (0.0);
+    else if(x < u[1]){
+      return( ( u[1]*(1+x) + 0.5 - 0.5*x*x )/(u[1]+1) ) ;
+    }
+    else
+      return(0.5*(u[1]+1)) ;
+  }
+  else{
+    double u1, tmp ;
+    u1 = u[l-1] ;
+
+    if(x < u[l]){
+      // if x < u_l, return (u_l - u_{l-1})* \psi( (x - u_l)/(u_l - u_{l-1}) )
+
+      tmp = u[l] - u1 ;
+      return( tmp*psi((x-u[l])/tmp) ) ;
+    }
+    else{
+      // if x >= u_l, return 0.5(u_l - u_{l-1})* (u_{l-1} - u_l){\psi( (x - u_l)/(u_{l-1} - u_l) ) - 0.5}
+
+      double u3 ;
+      int L=u.size()-1 ;
+      if(l==L)
+        u3 = 2.0*u[L] - u[L-1] ;
+      else
+        u3 = u[l+1] ;
+      tmp = u3 - u[l] ;
+      return( 0.5*(u[l]-u1) + tmp*(psi((x-u[l])/tmp)-0.5) ) ;
+    }
+  }
+}
