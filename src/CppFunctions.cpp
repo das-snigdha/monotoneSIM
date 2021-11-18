@@ -36,3 +36,15 @@ double h_l(double x, int l, const NumericVector& u){
     return( h((x - u[l])/(u3-u[l])) ) ;
   }
 }
+
+// \psi(x) = \int_{-1}^x h(t) dt
+double psi(double x){
+  if( x < -1.0 )
+    return(0.0) ;   // return 0 for x < -1
+  else if( x < 0.0 )
+    return( 0.5*(x+1.0)*(x+1.0) ) ;   // return 1/2*(x+1)^2 if -1<x<0
+  else if(x < 1.0)
+    return( 0.5 + 0.5*(2.0-x)*x ) ;   // return 1/2 * 1/2*(2-x)x if 0<=x<1
+  else
+    return(1.0) ;   // return 1 if x >= 1
+}
