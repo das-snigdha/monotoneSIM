@@ -117,3 +117,34 @@ double log_L(const NumericVector& y, const NumericVector& Xbeta,
   res = -0.5*res/sigma_sq_eps ;     // multiplying res by -(1/2*\sigma_sq_eps) to get log_L as defined
   return(res) ;
 }
+
+// Draw a sample from the Posterior Distribution of beta using Elliptical Slice Sampler
+// [[Rcpp::export]]
+List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVector& xi,
+                 const NumericVector&  beta_init, const NumericVector& u, double sigma_sq_eps,
+                 double sigma_sq_beta=10000.0){
+
+  // Initialize the required variables
+  int n=X.nrow(), p=X.ncol() ;
+  double uu, log_y, theta, theta_min, theta_max ;
+  NumericVector beta(p), beta_tilde(p), beta_new(p), beta_tilde_new(p), Xbeta(n), Xbeta_new(n), nu(p) ;
+
+  // Set the starting values of beta, beta_tilde and Xbeta = X * beta
+  vec_mem_cpy(beta_init, beta) ;
+  beta_tilde = sqrt((double)p*sigma_sq_beta)*beta ;
+  product(X, beta, Xbeta) ;
+
+  // Perform Elliptical Slice Sampling Algorithm
+
+  // Draw an observation from Uniform(0,1)
+  uu = runif(1)[0] ;
+
+  // Draw an observation from p-variate Normal(0, sigma_sq_beta*I_p)
+  nu = rnorm(p, 0.0, sqrt(sigma_sq_beta)) ;
+
+  // Calculate log_y = Log_L(beta) + log(u)
+  log_y = log_L(y, Xbeta, xi, sigma_sq_eps, u) + log(uu) ;
+
+  // Draw theta from Uniform(0, 2PI)
+  theta = 2.0*PI*runif(1)[0] ;
+}
