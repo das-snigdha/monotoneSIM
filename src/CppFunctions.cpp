@@ -142,9 +142,38 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
   // Draw an observation from p-variate Normal(0, sigma_sq_beta*I_p)
   nu = rnorm(p, 0.0, sqrt(sigma_sq_beta)) ;
 
-  // Calculate log_y = Log_L(beta) + log(u)
+  // Calculate log_y = Log_L(beta) + log(u) that defines a slice where log likelihood is atleast y
   log_y = log_L(y, Xbeta, xi, sigma_sq_eps, u) + log(uu) ;
 
   // Draw theta from Uniform(0, 2PI)
   theta = 2.0*PI*runif(1)[0] ;
+
+  // Shrink the bracket of drawing theta
+  theta_min = theta - 2.0*PI ;
+  theta_max = theta ;
+
+  // Draw a new beta_tilde from the ellipse passing through current beta_tilde and nu
+  beta_tilde_new = cos(theta)*beta_tilde + sin(theta)*nu ;
+  beta_new = beta_tilde_new / norm(beta_tilde_new) ;    // beta_new with unit norm
+  product(X, beta_new, Xbeta_new) ;
+
+  // If Log_L(beta_new) > log y, accept the value
+  // Else draw a new observation from the slice
+  while( log_L(y, Xbeta_new, xi, sigma_sq_eps, u) <= log_y ){
+    if(theta < 0)
+      theta_min = theta ;
+    else
+      theta_max = theta ;
+    theta = (theta_max-theta_min)*runif(1)[0] + theta_min ;   // shrink the bracket
+    beta_tilde_new = cos(theta)*beta_tilde + sin(theta)*nu ;  // try a new slice
+    beta_new = beta_tilde_new / norm(beta_tilde_new) ;
+    product(X, beta_new, Xbeta_new) ;
+  }
+
+  // Set beta, beta_tilde and Xbeta as the final values obtained from the algorithm
+  vec_mem_cpy(beta_new, beta) ;
+  vec_mem_cpy(beta_tilde_new, beta_tilde) ;
+  vec_mem_cpy(Xbeta_new, Xbeta) ;
+
+  return(List::create(Named("beta") = beta, Named("beta_tilde") = beta_tilde, Named("Xbeta") = Xbeta));
 }
