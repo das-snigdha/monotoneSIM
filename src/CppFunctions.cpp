@@ -2,6 +2,8 @@
 #include <math.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
+#include "CppBasics.h"
+
 using namespace Rcpp;
 
 // Triangular basis function h(x) = (1-|x|)_+
