@@ -75,3 +75,9 @@ NumericVector product(NumericMatrix A, NumericVector x){
   return(res) ;
 }
 
+// Multiply a matrix with a scalar and store it in "res" matrix passed as an argument
+void product(NumericMatrix A, double x, NumericMatrix res){
+  for(int i=0; i<A.nrow(); i++)
+    for(int j=0; j<A.ncol(); j++)
+      res(i,j) = x * A(i,j) ;   // Multply every element of A with x
+}
