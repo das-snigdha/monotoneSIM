@@ -55,3 +55,23 @@ NumericMatrix product(NumericMatrix A, NumericMatrix B){
   return(res) ;   // return the resulting matrix
 }
 
+// Multiply a matrix with a vector and store it in "res" vector passed as an argument
+void product(NumericMatrix A, NumericVector x, NumericVector res){
+for(int i=0; i<A.nrow(); i++)	{
+  res[i] = 0.0 ;
+  for(int j=0; j<A.ncol(); j++)
+    res[i] += A(i,j)*x[j] ; // res = A*x
+  }
+}
+
+// Multiply a matrix with a vector and return it as a vector
+NumericVector product(NumericMatrix A, NumericVector x){
+  NumericVector res(x.size()) ;
+  for(int i=0; i<A.nrow(); i++)	{
+    res[i] = 0.0 ;
+    for(int j=0; j<A.ncol(); j++)
+      res[i] += A(i,j)*x[j] ;   // res = A*x
+  }
+  return(res) ;
+}
+
