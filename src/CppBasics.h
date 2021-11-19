@@ -30,3 +30,28 @@ double norm(NumericVector x, int p=2, bool power=false){
   else
     return(pow(res, 1.0/(double)p)) ;   // otherwise return (\sum |x_i|^p)^(1/p)
 }
+
+// Calculate the product of 2 numeric matrices and store it in "res" matrix passed as an argument
+void product(NumericMatrix A, NumericMatrix B, NumericMatrix res){
+  for(int i=0; i<A.nrow(); i++)	{
+    for(int j=0; j<B.ncol(); j++)	{
+      res(i,j) = 0.0 ;
+      for(int k=0; k<A.ncol(); k++)
+        res(i,j) += A(i,k)*B(k,j) ;   // perform matrix multiplication
+    }
+  }
+}
+
+// Calculate the product of 2 numeric matrices and return it as a matrix
+NumericMatrix product(NumericMatrix A, NumericMatrix B){
+  NumericMatrix res(A.nrow(), B.ncol()) ;
+  for(int i=0; i<A.nrow(); i++)	{
+    for(int j=0; j<B.ncol(); j++)	{
+      res(i,j) = 0.0 ;
+      for(int k=0; k<A.ncol(); k++)
+        res(i,j) += A(i,k)*B(k,j) ;    // perform matrix multiplication
+    }
+  }
+  return(res) ;   // return the resulting matrix
+}
+
