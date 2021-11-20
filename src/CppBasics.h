@@ -161,3 +161,18 @@ double innerProduct(NumericVector x, NumericVector y){
     res += x[i]*y[i] ;
   return(res) ;
 }
+
+// Draw a sample from multivariate Normal (mu, Sigma) and store it in a vector passed as an argument
+NumericVector rmvnorm(NumericVector mu, NumericMatrix Sigma){
+  arma::mat Y = arma::randn(1,mu.size());
+  arma::mat Z = arma::repmat(as<arma::vec>(mu),1,1).t() + Y * arma::chol(as<arma::mat>(Sigma)) ;
+  return(wrap(Z)) ;
+}
+
+// Draw a sample from multivariate Normal (mu, Sigma) and return it
+void rmvnorm(NumericVector mu, NumericMatrix Sigma, NumericVector res){
+  arma::mat Y = arma::randn(1,mu.size());
+  arma::mat Z = arma::repmat(as<arma::vec>(mu),1,1).t() + Y * arma::chol(as<arma::mat>(Sigma)) ;
+  for(int i=0; i<res.size(); i++)
+    res[i] = Z(0,i) ;
+}
