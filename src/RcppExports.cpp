@@ -41,10 +41,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rtmvnormHMC
+NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& Sigma, const NumericVector& x_init, const NumericMatrix& ff, const NumericVector& gg, int n_burn);
+RcppExport SEXP _monotoneSIM_rtmvnormHMC(SEXP nSEXP, SEXP muSEXP, SEXP SigmaSEXP, SEXP x_initSEXP, SEXP ffSEXP, SEXP ggSEXP, SEXP n_burnSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type Sigma(SigmaSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type x_init(x_initSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type ff(ffSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type gg(ggSEXP);
+    Rcpp::traits::input_parameter< int >::type n_burn(n_burnSEXP);
+    rcpp_result_gen = Rcpp::wrap(rtmvnormHMC(n, mu, Sigma, x_init, ff, gg, n_burn));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_monotoneSIM_g", (DL_FUNC) &_monotoneSIM_g, 3},
     {"_monotoneSIM_update_beta", (DL_FUNC) &_monotoneSIM_update_beta, 7},
+    {"_monotoneSIM_rtmvnormHMC", (DL_FUNC) &_monotoneSIM_rtmvnormHMC, 7},
     {NULL, NULL, 0}
 };
 

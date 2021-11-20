@@ -9,3 +9,7 @@ update_beta <- function(y, X, xi, beta_init, u, sigma_sq_eps, sigma_sq_beta = 10
     .Call('_monotoneSIM_update_beta', PACKAGE = 'monotoneSIM', y, X, xi, beta_init, u, sigma_sq_eps, sigma_sq_beta)
 }
 
+rtmvnormHMC <- function(n, mu, Sigma, x_init, ff, gg, n_burn = 0L) {
+    .Call('_monotoneSIM_rtmvnormHMC', PACKAGE = 'monotoneSIM', n, mu, Sigma, x_init, ff, gg, n_burn)
+}
+

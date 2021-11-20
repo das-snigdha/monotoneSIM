@@ -120,7 +120,7 @@ double log_L(const NumericVector& y, const NumericVector& Xbeta,
   return(res) ;
 }
 
-// Draw a sample from the Posterior Distribution of beta using Elliptical Slice Sampler
+// Function to Draw a sample from the Posterior Distribution of beta using Elliptical Slice Sampler
 // [[Rcpp::export]]
 List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVector& xi,
                  const NumericVector&  beta_init, const NumericVector& u, double sigma_sq_eps,
@@ -295,5 +295,60 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
     // Transform it to get the required truncated Normal(mu, Sigma)
   }
   return(res) ;
+}
 
+// Function to Draw a sample from the Posterior Distribution of xi
+// y : nx1 response variable
+// Xbeta : nx1 vector containing X*beta, X: nxp matrix of covariates, beta: px1 predictors
+// xi_init: starting value of xi
+// Sigma_xi : Prior variance of xi
+// u : vector of knots ranging from -1 to 1
+// sigma_sq_eps : error variance of the model
+// monotone : TRUE OR FALSE denoting whether the single index function is monotone or not. Takes FALSE by default
+// n_HMC : required size of the HMC sample
+List update_xi(const NumericVector& y, const NumericVector& Xbeta, const NumericVector& xi_init,
+               const NumericMatrix& Sigma_xi, const NumericVector& u, double sigma_sq_eps,
+               bool monotone=false, int n_HMC=10){
+
+  // Initialize required variables
+  int n = y_obs.size(), L = xi_init.size() - 1 ;
+  NumericVector nu_xi(L+1), tmp_L(L+1);
+  NumericMatrix Psi(n,L+1), PsiPsi(L+1,L+1), Omega_xi(L+1, L+1), B_xi(L+1,L+1), B_xi_inv(L+1,L+1), ff(L+1,L+1) ;
+
+  //Psi_il = psi_l(Xbeta[i])
+  for(int i=0; i<n; i++){
+    for(int l=0; l<L+1; l++){
+      Psi(i,l) = psi_l(Xbeta[i], l, u) ;
+    }
+  }
+  AtA(Psi, PsiPsi) ;    //PsiPsi = Psi^{\top}*Psi
+  solve(Sigma_xi, Omega_xi) ;   //Omega_xi = Sigma_xi^(-1)
+
+  // Defining the constraints of xi. Here xi follows a truncated Normal distribution N_+(0, Sigma_xi).
+  // i.e. xi_l >= 0 for all l i.e. <F_l,xi_l> + g_l = 0
+  // F = (F_0,...,F_L) = I_{L+1} and g = (0,...,0)
+  for(int l=0; l<L+1; l++)
+    ff(l,l) = 1.0 ;
+
+  // Posterior variance of xi is B_xi = [Omega_xi + (Psi^\top Psi)/sigma_sq_eps]^(-1)
+  product(PsiPsi, 1.0/sigma_sq_eps, B_xi) ; // B_xi: temporary mtx
+  sum(B_xi, Omega_xi, B_xi_inv) ;
+  solve(B_xi_inv, B_xi) ;
+
+  // Posterior mean of xi is nu_xi = (B_xi Psi^\top y)/ sigma_sq_eps
+  Atx(Psi, y, tmp_L) ;
+  product(B_xi, tmp_L, nu_xi) ;
+  for(int l=0; l<L+1; l++)
+    nu_xi[l] /= sigma_sq_eps ;
+
+  // if g is not monotone, then xi's need not be non negative.
+  // then draw xi from Normal distribution with mean = nu_xi and variance = B_xi
+  if(monotone==false){
+    rmvnorm(nu_xi, B_xi, xi) ;
+  }
+  else{
+    // if g is monotone, then xi_l >= 0 for all l
+    // draw xi from truncated Normal distribution N_+(nu_xi, B_xi) using HMC algorithm
+    xi = rtmvnormHMC(1+n_HMC, nu_xi, B_xi, xi_init, ff, rep(0.0, L+1), 0)(n_HMC,_) ;
+  }
 }
