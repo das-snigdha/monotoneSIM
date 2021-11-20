@@ -81,3 +81,54 @@ void product(NumericMatrix A, double x, NumericMatrix res){
     for(int j=0; j<A.ncol(); j++)
       res(i,j) = x * A(i,j) ;   // Multply every element of A with x
 }
+
+// Calculate the transpose of a matrix and store in a matrix passed as an argument
+void transpose(NumericMatrix A, NumericMatrix t_A){
+  for(int i=0; i<A.nrow(); i++)
+    for(int j=0; j<A.ncol(); j++)
+      t_A(j,i) = A(i,j) ;
+}
+
+// Calculate the transpose of A matrix and return it
+NumericMatrix transpose(NumericMatrix A){
+  NumericMatrix t_A(A.nrow(), A.ncol()) ;
+  for(int i=0; i<A.nrow(); i++)
+    for(int j=0; j<A.ncol(); j++)
+      t_A(j,i) = A(i,j) ;
+  return(t_A) ;
+}
+
+// Calculate Cholesky Decomposition of a matrix and store in a matrix passed as an argument
+void chol(NumericMatrix A, NumericMatrix res){
+  int n = A.nrow() ;
+  arma::mat tmp = arma::chol(as<arma::mat>(A)) ;
+  for(int i=0; i<n; i++)
+    for(int j=0; j<n; j++)
+      res(i,j) = tmp(i,j) ;
+}
+
+// Calculate Cholesky Decomposition of a matrix and return it
+NumericMatrix chol(NumericMatrix A){
+  int n = A.nrow() ;
+  NumericMatrix res(n,n) ;
+  arma::mat tmp = arma::chol(as<arma::mat>(A)) ;
+  for(int i=0; i<n; i++)
+    for(int j=0; j<n; j++)
+      res(i,j) = tmp(i,j) ;
+  return(res) ;
+}
+
+// Calculate the inverse of a matrix and store in a matrix passed as an argument
+void solve(NumericMatrix A, NumericMatrix A_inv){
+  arma::mat tmp = as<arma::mat>(A).i() ;
+
+  for(int i=0; i<A.nrow(); i++)
+    for(int j=0; j<A.ncol(); j++)
+      A_inv(i,j) = tmp(i,j) ;
+}
+
+// Calculate the inverse of a matrix and return it
+NumericMatrix solve(NumericMatrix A){
+  arma::mat res = as<arma::mat>(A).i() ;
+  return(wrap(res)) ;
+}
