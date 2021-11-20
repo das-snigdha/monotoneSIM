@@ -210,5 +210,90 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
       f(j,i) = innerProduct(Sigma_chol_U(i,_), ff(j,_)) ;
   }
 
+  // Perform the HMC algorithm
+  for(int nn=0; nn<n+n_burn; nn++){
+
+    s = rnorm(d) ;    // Draw s ~ Normal(0, I_d)
+    vec_mem_cpy(s, a) ;   // a = s
+    vec_mem_cpy(x, b) ;   // b = s
+
+    T_end = PI/2.0 ;    // T_end = PI/2, end time point
+
+    while(1){
+      for(int j=0; j<m; j++){
+
+        // u = sqrt((<f_j,a>)^2 + (<f_j,b>)^2)
+        tmp = innerProduct(f(j,_), a) ;
+        tmp2 = innerProduct(f(j,_), b) ;
+        u = sqrt(tmp*tmp + tmp2*tmp2) ;
+
+        // phi = tan^-1 (-tmp/tmp2)
+        phi = atan2(-1.0*tmp, tmp2) ;
+
+        if((u < g[j]) || (u < -1.0*g[j]))     // condition to check if the jth particle has hit the wall
+          T[j] = T_end ;    // Set the time point of the jth particle as the end point
+        else{
+          // if the jth particle is still along trajectory, calculate the time to hit the wall using
+          // u * cos(T_j + phi) + g_j = 0
+          T[j] = acos(-1.0*g[j]/u) - phi ;
+          if(T[j] < 0.0){
+            T[j] += 2.0*PI ;
+            // Rprintf("1\n") ;
+          }
+        }
+      }
+
+      // T_h = min {T_1, T_2, ..., T_m}
+      h = 0 ;
+      T_h = T[0] ;
+      for(int j=1; j<m; j++){
+        if(T[j] < T_h){
+          T_h = T[j] ;
+          h = j ;
+        }
+      }
+
+      if(T_h < T_end){
+        // if atleast one of the particles has not hit the wall, Set:
+        // x_i = a_i sin(T_h) + b_i cos(T_h)
+        // x_dot_i = a_i sin(T_h) - b_i cos(T_h)
+        for(int i=0; i<d; i++){
+          tmp = sin(T_h - 1e-10) ;
+          tmp2 = cos(T_h - 1e-10) ;
+          x[i] = a[i]*tmp + b[i]*tmp2 ;
+          x_dot[i] = a[i]*tmp2 - b[i]*tmp ;
+        }
+
+        // set a_i as the reflected velocity at time T_h
+        alpha_h = innerProduct(f(h,_), x_dot) / norm(f(h,_),2,true) ;
+        for(int i=0; i<d; i++)
+          a[i] = x_dot[i] - 2.0*alpha_h*f(h,i) ;
+
+        // Set b_i = x_i
+        vec_mem_cpy(x, b) ;
+
+        // Decrease the end time point by T_h
+        T_end -= T_h ;
+      }
+      else{
+
+        // if all particles have hit the wall, Set x_i = a_i sin(T_h) + b_i cos(T_h)
+        // and stop the algorithm
+        for(int i=0; i<d; i++){
+          tmp = sin(T_end) ;
+          tmp2 = cos(T_end) ;
+          x[i] = a[i]*tmp + b[i]*tmp2 ;
+        }
+        break ;
+      }
+    }
+    // Store samples after burn-in period
+    if(nn >= n_burn)
+      for(int i=0; i<d; i++)
+        res(nn-n_burn,i) = innerProduct(Sigma_chol_L(i,_), x) + mu[i] ;
+    // Obtained x is a sample from truncated Normal(0, I_d)
+    // Transform it to get the required truncated Normal(mu, Sigma)
+  }
+  return(res) ;
 
 }
