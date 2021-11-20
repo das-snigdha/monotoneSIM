@@ -132,3 +132,32 @@ NumericMatrix solve(NumericMatrix A){
   arma::mat res = as<arma::mat>(A).i() ;
   return(wrap(res)) ;
 }
+
+// Calculate A^{\top} * x, A: matrix and X: vector
+void Atx(NumericMatrix A, NumericVector x, NumericVector res){
+  for(int i=0; i<A.ncol(); i++)	{
+    res[i] = 0.0 ;
+    for(int j=0; j<A.nrow(); j++)
+      res[i] += A(j,i)*x[j] ;
+  }
+}
+
+// Calculate A^{\top} * A, where A is a matrix
+void AtA(NumericMatrix A, NumericMatrix res){
+  // res = t(A) %*% A
+  for(int i=0; i<A.ncol(); i++){
+    for(int j=0; j<A.ncol(); j++){
+      res(i,j) = 0.0 ;
+      for(int k=0; k<A.nrow(); k++)
+        res(i,j) += A(k,i)*A(k,j) ;
+    }
+  }
+}
+
+// Calculate the innerproduct of 2 vectors x and y
+double innerProduct(NumericVector x, NumericVector y){
+  double res=0.0 ;
+  for(int i=0; i<x.size(); i++)
+    res += x[i]*y[i] ;
+  return(res) ;
+}
