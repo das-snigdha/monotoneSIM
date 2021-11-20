@@ -179,3 +179,36 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
 
   return(List::create(Named("beta") = beta, Named("beta_tilde") = beta_tilde, Named("Xbeta") = Xbeta));
 }
+
+// Function to draw a sample of size n from truncated Normal distribution using an exact Hamiltonian Monte Carlo Algorithm
+// x_init ~ d-variate Normal(mu, Sigma)
+// constraints: <ff(j,_), x_init> + gg[j] \geq 0, j=1,...,m
+// n: required sample size
+// n_burn : Burn in period of the Monte Carlo Algorithm
+// [[Rcpp::export]]
+NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& Sigma,
+                          const NumericVector& x_init, const NumericMatrix& ff,
+                          const NumericVector& gg, int n_burn=0){
+
+  // Initialize required varaibles
+  int d=mu.size(), m=ff.nrow(), h ;
+  double u, phi, tmp, tmp2, T_end, T_h, alpha_h ;
+  NumericVector x(d), s(d), a(d), b(d), T(m), x_dot(d), g(m) ;
+  NumericMatrix f(m,d), res(n,d), Sigma_chol_L(d,d), Sigma_chol_U(d,d) ;
+
+  // Sigma = Sigma_col_L * Sigma_col_U by Cholesky Decomposition
+  chol(Sigma, Sigma_chol_U) ;
+  transpose(Sigma_chol_U, Sigma_chol_L) ;
+
+  // x = (Sigma_chol_L)^-1 (x_init-mu) ~ d-variate Normal(0, I_d)
+  product(solve(Sigma_chol_L), x_init-mu, x) ;
+
+  // Adjust the constraints on x_init to apply them on x
+  for(int j=0; j<m; j++){
+    g[j] = innerProduct(ff(j,_), mu) + gg[j] ;
+    for(int i=0; i<d; i++)
+      f(j,i) = innerProduct(Sigma_chol_U(i,_), ff(j,_)) ;
+  }
+
+
+}
