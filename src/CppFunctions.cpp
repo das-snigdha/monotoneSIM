@@ -121,6 +121,13 @@ double log_L(const NumericVector& y, const NumericVector& Xbeta,
 }
 
 // Function to Draw a sample from the Posterior Distribution of beta using Elliptical Slice Sampler
+// y : nx1 response variable
+// X : nxp matrix of covariates
+// xi : (L+1)x1 vector of coefficients to contruct the single index function
+// beta_init : px1 starting value of beta, having unit Euclidean norm
+// u : vector of knots ranging from -1 to 1
+// sigma_sq_eps : error variance of the model
+// sigma_sq_beta : Prior variance of beta, set to 10000, by default
 // [[Rcpp::export]]
 List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVector& xi,
                  const NumericVector&  beta_init, const NumericVector& u, double sigma_sq_eps,
@@ -306,13 +313,13 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
 // sigma_sq_eps : error variance of the model
 // monotone : TRUE OR FALSE denoting whether the single index function is monotone or not. Takes FALSE by default
 // n_HMC : required size of the HMC sample
-List update_xi(const NumericVector& y, const NumericVector& Xbeta, const NumericVector& xi_init,
+NumericVector update_xi(const NumericVector& y, const NumericVector& Xbeta, const NumericVector& xi_init,
                const NumericMatrix& Sigma_xi, const NumericVector& u, double sigma_sq_eps,
                bool monotone=false, int n_HMC=10){
 
   // Initialize required variables
-  int n = y_obs.size(), L = xi_init.size() - 1 ;
-  NumericVector nu_xi(L+1), tmp_L(L+1);
+  int n = y.size(), L = xi_init.size() - 1 ;
+  NumericVector nu_xi(L+1), tmp_L(L+1), xi(L+1);
   NumericMatrix Psi(n,L+1), PsiPsi(L+1,L+1), Omega_xi(L+1, L+1), B_xi(L+1,L+1), B_xi_inv(L+1,L+1), ff(L+1,L+1) ;
 
   //Psi_il = psi_l(Xbeta[i])
@@ -351,4 +358,5 @@ List update_xi(const NumericVector& y, const NumericVector& Xbeta, const Numeric
     // draw xi from truncated Normal distribution N_+(nu_xi, B_xi) using HMC algorithm
     xi = rtmvnormHMC(1+n_HMC, nu_xi, B_xi, xi_init, ff, rep(0.0, L+1), 0)(n_HMC,_) ;
   }
+  return(xi);
 }
