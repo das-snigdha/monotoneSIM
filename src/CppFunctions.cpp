@@ -360,3 +360,25 @@ NumericVector update_xi(const NumericVector& y, const NumericVector& Xbeta, cons
   }
   return(xi);
 }
+
+// Function to Draw a sample from the Posterior Distribution of xi
+// y : nx1 response variable
+// Xbeta : nx1 vector containing X*beta, X: nxp matrix of covariates, beta: px1 predictors
+// xi : (L+1)x1 vector of coefficients to contruct the single index function
+// u : vector of knots ranging from -1 to 1
+// a_eps, b_eps : Prior distribution of sigma_sq_eps is Inv Gamma(a_eps, b_eps)
+double update_sigma_sq_eps(const NumericVector& y, const NumericVector& Xbeta, const NumericVector& xi,
+                           const NumericVector& u, double a_eps=1.0, double b_eps=1.0){
+
+  // Initialize required variables
+  int n = y.size();
+  NumericVector eps(n);
+
+  // eps = y - g(X^\top beta)
+  for(int i=0; i<n; i++){
+    eps[i] = y[i] - g(Xbeta[i], xi, u) ;
+  }
+  // sigma_sq_eps ~ Inv Gamma (a_eps + n/2, 1/(b_eps + (eps^\top eps)/2))
+  double sigma_sq_eps = 1.0/rgamma(1, a_eps+0.5*n, 1.0/(b_eps + 0.5*innerProduct(eps,eps)))[0] ;
+  return(sigma_sq_eps);
+}
