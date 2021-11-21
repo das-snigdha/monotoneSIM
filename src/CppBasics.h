@@ -176,3 +176,35 @@ void rmvnorm(NumericVector mu, NumericMatrix Sigma, NumericVector res){
   for(int i=0; i<res.size(); i++)
     res[i] = Z(0,i) ;
 }
+
+// Add a scalar to every element of a matrix and store it in a matrix passed as an argument
+void sum(NumericMatrix A, double b, NumericMatrix res){
+  for(int i=0; i<A.nrow(); i++)
+    for(int j=0; j<A.ncol(); j++)
+      res(i,j) = A(i,j) + b ;
+}
+
+// Add 2 matrices and store it in a matrix passed as an argument
+void sum(NumericMatrix A, NumericMatrix B, NumericMatrix res){
+  for(int i=0; i<A.nrow(); i++)
+    for(int j=0; j<A.ncol(); j++)
+      res(i,j) = A(i,j) + B(i,j) ;
+}
+
+// Add a scalar to every element of a matrix and return it as a matrix
+NumericMatrix sum(NumericMatrix A, double b){
+  NumericMatrix res(A.nrow(), A.ncol()) ;
+  for(int i=0; i<A.nrow(); i++)
+    for(int j=0; j<A.ncol(); j++)
+      res(i,j) = A(i,j) + b ;
+  return(res) ;
+}
+
+// Add 2 matrices and return it as a matrix
+NumericMatrix sum(NumericMatrix A, NumericMatrix B){
+  NumericMatrix res(A.nrow(), A.ncol()) ;
+  for(int i=0; i<A.nrow(); i++)
+    for(int j=0; j<A.ncol(); j++)
+      res(i,j) = A(i,j) + B(i,j) ;
+  return(res) ;
+}
