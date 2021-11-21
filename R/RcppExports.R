@@ -5,11 +5,11 @@ g <- function(x, xi, u) {
     .Call('_monotoneSIM_g', PACKAGE = 'monotoneSIM', x, xi, u)
 }
 
-update_beta <- function(y, X, xi, beta_init, u, sigma_sq_eps, sigma_sq_beta = 10000.0) {
-    .Call('_monotoneSIM_update_beta', PACKAGE = 'monotoneSIM', y, X, xi, beta_init, u, sigma_sq_eps, sigma_sq_beta)
-}
-
 rtmvnormHMC <- function(n, mu, Sigma, x_init, ff, gg, n_burn = 0L) {
     .Call('_monotoneSIM_rtmvnormHMC', PACKAGE = 'monotoneSIM', n, mu, Sigma, x_init, ff, gg, n_burn)
+}
+
+monotoneSIM_c <- function(y, X, beta_init, xi_init, Sigma_xi, u, monotone = FALSE, n_HMC = 10L, sigma_sq_beta = 10000.0, sigma_sq_eps_init = 0.01, a_eps = 1.0, b_eps = 1.0, M_burn = 100L, M = 1000L) {
+    .Call('_monotoneSIM_monotoneSIM_c', PACKAGE = 'monotoneSIM', y, X, beta_init, xi_init, Sigma_xi, u, monotone, n_HMC, sigma_sq_beta, sigma_sq_eps_init, a_eps, b_eps, M_burn, M)
 }
 

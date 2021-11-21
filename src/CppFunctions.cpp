@@ -128,7 +128,6 @@ double log_L(const NumericVector& y, const NumericVector& Xbeta,
 // u : vector of knots ranging from -1 to 1
 // sigma_sq_eps : error variance of the model
 // sigma_sq_beta : Prior variance of beta, set to 10000, by default
-// [[Rcpp::export]]
 List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVector& xi,
                  const NumericVector&  beta_init, const NumericVector& u, double sigma_sq_eps,
                  double sigma_sq_beta=10000.0){
@@ -383,7 +382,6 @@ double update_sigma_sq_eps(const NumericVector& y, const NumericVector& Xbeta, c
   return(sigma_sq_eps);
 }
 
-
 // MCMC algorithm to draw samples from the conditional posterior distributions of xi, beta and sigma_sq_eps
 // y : nx1 response variable
 // X: nxp matrix of covariates
@@ -398,6 +396,7 @@ double update_sigma_sq_eps(const NumericVector& y, const NumericVector& Xbeta, c
 // a_eps, b_eps : Hyperparameters specifying Prior distribution of sigma_sq_eps which is Inv Gamma(a_eps, b_eps)
 // M_burn : Burn-in period of the MCMC algorithm
 // M : required size of the  MCMC sample
+// [[Rcpp::export]]
 List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const NumericVector& beta_init,
                    const NumericVector& xi_init, const NumericMatrix& Sigma_xi, const NumericVector& u,
                    bool monotone=false, int n_HMC=10, double sigma_sq_beta=10000.0,
@@ -422,7 +421,8 @@ List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const Numeric
     // update xi
     xi = update_xi(y, Xbeta, xi, Sigma_xi, u, sigma_sq_eps, monotone, n_HMC) ;
     // update beta
-    beta_ES = update_beta(y, X, xi, beta, u, sigma_sq_eps, sigma_sq_beta) ;
+    // beta_ES stores beta updated using Elliptical Slice Sampler
+    List beta_ES = update_beta(y, X, xi, beta, u, sigma_sq_eps, sigma_sq_beta) ;
     beta = beta_ES["beta"] ;
     Xbeta = beta_ES["Xbeta"] ;
     // update sigma_sq_eps

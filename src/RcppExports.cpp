@@ -24,23 +24,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// update_beta
-List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVector& xi, const NumericVector& beta_init, const NumericVector& u, double sigma_sq_eps, double sigma_sq_beta);
-RcppExport SEXP _monotoneSIM_update_beta(SEXP ySEXP, SEXP XSEXP, SEXP xiSEXP, SEXP beta_initSEXP, SEXP uSEXP, SEXP sigma_sq_epsSEXP, SEXP sigma_sq_betaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type xi(xiSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type beta_init(beta_initSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type u(uSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma_sq_eps(sigma_sq_epsSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma_sq_beta(sigma_sq_betaSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_beta(y, X, xi, beta_init, u, sigma_sq_eps, sigma_sq_beta));
-    return rcpp_result_gen;
-END_RCPP
-}
 // rtmvnormHMC
 NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& Sigma, const NumericVector& x_init, const NumericMatrix& ff, const NumericVector& gg, int n_burn);
 RcppExport SEXP _monotoneSIM_rtmvnormHMC(SEXP nSEXP, SEXP muSEXP, SEXP SigmaSEXP, SEXP x_initSEXP, SEXP ffSEXP, SEXP ggSEXP, SEXP n_burnSEXP) {
@@ -58,11 +41,35 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// monotoneSIM_c
+List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const NumericVector& beta_init, const NumericVector& xi_init, const NumericMatrix& Sigma_xi, const NumericVector& u, bool monotone, int n_HMC, double sigma_sq_beta, double sigma_sq_eps_init, double a_eps, double b_eps, int M_burn, int M);
+RcppExport SEXP _monotoneSIM_monotoneSIM_c(SEXP ySEXP, SEXP XSEXP, SEXP beta_initSEXP, SEXP xi_initSEXP, SEXP Sigma_xiSEXP, SEXP uSEXP, SEXP monotoneSEXP, SEXP n_HMCSEXP, SEXP sigma_sq_betaSEXP, SEXP sigma_sq_eps_initSEXP, SEXP a_epsSEXP, SEXP b_epsSEXP, SEXP M_burnSEXP, SEXP MSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type beta_init(beta_initSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type xi_init(xi_initSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type Sigma_xi(Sigma_xiSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type u(uSEXP);
+    Rcpp::traits::input_parameter< bool >::type monotone(monotoneSEXP);
+    Rcpp::traits::input_parameter< int >::type n_HMC(n_HMCSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma_sq_beta(sigma_sq_betaSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma_sq_eps_init(sigma_sq_eps_initSEXP);
+    Rcpp::traits::input_parameter< double >::type a_eps(a_epsSEXP);
+    Rcpp::traits::input_parameter< double >::type b_eps(b_epsSEXP);
+    Rcpp::traits::input_parameter< int >::type M_burn(M_burnSEXP);
+    Rcpp::traits::input_parameter< int >::type M(MSEXP);
+    rcpp_result_gen = Rcpp::wrap(monotoneSIM_c(y, X, beta_init, xi_init, Sigma_xi, u, monotone, n_HMC, sigma_sq_beta, sigma_sq_eps_init, a_eps, b_eps, M_burn, M));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_monotoneSIM_g", (DL_FUNC) &_monotoneSIM_g, 3},
-    {"_monotoneSIM_update_beta", (DL_FUNC) &_monotoneSIM_update_beta, 7},
     {"_monotoneSIM_rtmvnormHMC", (DL_FUNC) &_monotoneSIM_rtmvnormHMC, 7},
+    {"_monotoneSIM_monotoneSIM_c", (DL_FUNC) &_monotoneSIM_monotoneSIM_c, 14},
     {NULL, NULL, 0}
 };
 
