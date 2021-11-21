@@ -312,7 +312,7 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
 // u : vector of knots ranging from -1 to 1
 // sigma_sq_eps : error variance of the model
 // monotone : TRUE OR FALSE denoting whether the single index function is monotone or not. Takes FALSE by default
-// n_HMC : required size of the HMC sample
+// n_HMC : number of the HMC iterations in truncated normal sampling
 NumericVector update_xi(const NumericVector& y, const NumericVector& Xbeta, const NumericVector& xi_init,
                const NumericMatrix& Sigma_xi, const NumericVector& u, double sigma_sq_eps,
                bool monotone=false, int n_HMC=10){
@@ -364,9 +364,9 @@ NumericVector update_xi(const NumericVector& y, const NumericVector& Xbeta, cons
 // Function to Draw a sample from the Posterior Distribution of xi
 // y : nx1 response variable
 // Xbeta : nx1 vector containing X*beta, X: nxp matrix of covariates, beta: px1 predictors
-// xi : (L+1)x1 vector of coefficients to contruct the single index function
+// xi : (L+1)x1 vector of coefficients to construct the single index function
 // u : vector of knots ranging from -1 to 1
-// a_eps, b_eps : Prior distribution of sigma_sq_eps is Inv Gamma(a_eps, b_eps)
+// a_eps, b_eps : Hyperparameters specifying Prior distribution of sigma_sq_eps which is Inv Gamma(a_eps, b_eps)
 double update_sigma_sq_eps(const NumericVector& y, const NumericVector& Xbeta, const NumericVector& xi,
                            const NumericVector& u, double a_eps=1.0, double b_eps=1.0){
 
@@ -381,4 +381,60 @@ double update_sigma_sq_eps(const NumericVector& y, const NumericVector& Xbeta, c
   // sigma_sq_eps ~ Inv Gamma (a_eps + n/2, 1/(b_eps + (eps^\top eps)/2))
   double sigma_sq_eps = 1.0/rgamma(1, a_eps+0.5*n, 1.0/(b_eps + 0.5*innerProduct(eps,eps)))[0] ;
   return(sigma_sq_eps);
+}
+
+
+// MCMC algorithm to draw samples from the conditional posterior distributions of xi, beta and sigma_sq_eps
+// y : nx1 response variable
+// X: nxp matrix of covariates
+// beta_init: px1 vector containing starting value of predictors
+// xi_init: (L+1)x1 vector containing starting value of coefficients that construct the single index function
+// Sigma_xi : Prior variance of xi
+// u : vector of knots ranging from -1 to 1
+// monotone : TRUE OR FALSE denoting whether the single index function is monotone or not. Takes FALSE by default
+// n_HMC : number of the HMC iterations in truncated normal sampling
+// sigma_sq_beta : Prior variance of beta
+// sigma_sq_eps_init : Starting value of error variance of the model
+// a_eps, b_eps : Hyperparameters specifying Prior distribution of sigma_sq_eps which is Inv Gamma(a_eps, b_eps)
+// M_burn : Burn-in period of the MCMC algorithm
+// M : required size of the  MCMC sample
+List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const NumericVector& beta_init,
+                   const NumericVector& xi_init, const NumericMatrix& Sigma_xi, const NumericVector& u,
+                   bool monotone=false, int n_HMC=10, double sigma_sq_beta=10000.0,
+                   double sigma_sq_eps_init=0.01, double a_eps=1.0, double b_eps=1.0,
+                   int M_burn=100, int M=1000){
+
+  // Initialize required variables
+  int n=y.size(), p=X.ncol(), L=xi_init.size()-1 ;
+  double sigma_sq_eps ;
+  NumericVector beta(p), xi(L+1), Xbeta(n) ;
+  NumericVector sigma_sq_eps_vec(M) ;
+  NumericMatrix xi_mtx(M,L+1), beta_mtx(M,p) ;
+
+  // Copy the initial provided values of xi, beta and sigma_sq_eps and calculate Xbeta
+  vec_mem_cpy(xi_init, xi) ;
+  vec_mem_cpy(beta_init, beta) ;
+  product(X, beta, Xbeta) ;
+  sigma_sq_eps = sigma_sq_eps_init ;
+
+  // MCMC algorithm
+  for(int m=0; m<M+M_burn; m++){
+    // update xi
+    xi = update_xi(y, Xbeta, xi, Sigma_xi, u, sigma_sq_eps, monotone, n_HMC) ;
+    // update beta
+    beta_ES = update_beta(y, X, xi, beta, u, sigma_sq_eps, sigma_sq_beta) ;
+    beta = beta_ES["beta"] ;
+    Xbeta = beta_ES["Xbeta"] ;
+    // update sigma_sq_eps
+    sigma_sq_eps = update_sigma_sq_eps(y, Xbeta, xi, u, a_eps, b_eps) ;
+
+    if(m >= M_burn){
+      // store the samples after Burn-in
+      xi_mtx(m-M_burn,_) = xi ;
+      beta_mtx(m-M_burn,_) = beta ;
+      sigma_sq_eps_vec[m-M_burn] = sigma_sq_eps ;
+    }
+  }
+  // return the MCMC sample
+  return(List::create(Named("xi") = xi_mtx, Named("beta") = beta_mtx, Named("sigma_sq_eps") = sigma_sq_eps_vec));
 }
