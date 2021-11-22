@@ -65,11 +65,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// g_mtx
+NumericMatrix g_mtx(const NumericMatrix& xi_mtx, const NumericVector& grid_x, const NumericVector& u);
+RcppExport SEXP _monotoneSIM_g_mtx(SEXP xi_mtxSEXP, SEXP grid_xSEXP, SEXP uSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type xi_mtx(xi_mtxSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type grid_x(grid_xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type u(uSEXP);
+    rcpp_result_gen = Rcpp::wrap(g_mtx(xi_mtx, grid_x, u));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_monotoneSIM_g", (DL_FUNC) &_monotoneSIM_g, 3},
     {"_monotoneSIM_rtmvnormHMC", (DL_FUNC) &_monotoneSIM_rtmvnormHMC, 7},
     {"_monotoneSIM_monotoneSIM_c", (DL_FUNC) &_monotoneSIM_monotoneSIM_c, 14},
+    {"_monotoneSIM_g_mtx", (DL_FUNC) &_monotoneSIM_g_mtx, 3},
     {NULL, NULL, 0}
 };
 
