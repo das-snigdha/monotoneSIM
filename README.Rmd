@@ -1,0 +1,40 @@
+---
+title: "Bayesian Estimation of Monotone Single Index Models"
+output: 
+  pdf_document: default
+  github_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Description and Intended Functionality
+
+This package intends to perform a Markov Chain Monte Carlo algorithm to estimate a monotone Single index models of the form: 
+$$y = g(x^{\top} \beta) + \epsilon$$
+
+where $y$: response, $x$: p-dimensional predictors, $\beta$: p-dimensional coefficient vector,  $\epsilon$: independent N($0,\ \sigma_\epsilon^2$) random errors, $g$: unknown monotone link function. 
+To construct a prior on $g$, we consider the basis expansion: $g(x) = \Sigma^{L}_{l=0} \, \xi_l \, \psi_l(x)$, where $\psi_l(x) = \int^{x}_{-1} h_l(t)\,\text{d}t$ , $h_l$ is a B-Spline basis function of order 2. Then, $g$ is monotonically increasing if and only if $\xi_l \geq 0 \ \forall \ l$, thereby enforcing the monotonicity constraint in an equivalent way. 
+
+The `monotoneSIM` function rescales the covariates and $\beta$ so that $|x^{\top} \beta| \leq 1$. Then an MCMC algorithm is performed to generate samples from the conditional posteriors of the unknown parameters, $\xi,\ \beta,\ \sigma_\epsilon^2$. The obtained sample of $\beta$ is back-scaled to get $\beta$ corresponding to the original covariates. The function also returns the estimated monotone function $g$ for a grid of x values based on $\xi$ obtained from the algorithm.
+
+## Installation
+
+To install this package from Github, run the following in your R console:
+```{r echo = TRUE, eval = FALSE}
+devtools::install_github("das-snigdha/monotoneSIM")
+```
+
+## To Do
+
+The following tasks shall be performed during the remaining of the semester:
+
+* Perform Compatibility Checks on user supplied input.
+* Select equispaced `knots`, $u_0, u_1, \dots, u_L$ between -1 and 1, if not supplied.
+* Select grid of x values, `grid.x` between -1 and 1 of length `size.grid.x`, if not supplied
+* Perform scaling of covariate matrix `X` and supplied `beta.init`.
+* Perform back-scaling on obtained `beta`, to get coefficients corresponding to unscaled X.
+* Create a vignette to demonstrate the usage, if time permits.
+
+
