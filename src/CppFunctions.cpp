@@ -438,3 +438,22 @@ List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const Numeric
   // return the MCMC sample
   return(List::create(Named("xi") = xi_mtx, Named("beta") = beta_mtx, Named("sigma_sq_eps") = sigma_sq_eps_vec));
 }
+
+// Function to calculate the value of g(x) for a grid of x values and xi vectors.
+// xi_mtx : Matrix whose rows contain (L+1)X1 vector xi_j, j = 1(1)M
+// grid_x : NX1 vector contaning the x-values
+// u : L+1)X1 vector of knots from -1 to 1
+// [[Rcpp::export]]
+NumericMatrix g_mtx(const NumericMatrix& xi_mtx,const NumericVector& grid_x, const NumericVector& u){
+  // Initialize variables
+  int M = xi_mtx.nrow(), N = grid_x.size() ;
+  NumericMatrix res(M, N) ;
+
+  // Calculate g(x) for every x and every vector xi
+  for(int i = 0; i<M; i++){
+    for(int j = 0; j<N; j++){
+      res(i, j) = g(grid_x(j), xi_mtx(i,_), u) ;
+    }
+  }
+  return(res) ;
+}
