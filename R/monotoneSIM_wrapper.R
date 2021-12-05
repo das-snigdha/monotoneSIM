@@ -30,20 +30,24 @@ monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots, monotone = TRU
   # scale beta.init so that starting value of beta has unit euclidean norm
   beta.std = beta.init/norm(beta.init, "2")
 
-  # Center (using column means) and Scale (using column standard deviations) the covariate matrix X so that every row of X has euclidean norm <= 1.
-  X.std = scale(X, center = TRUE, scale = TRUE)
-  weights = max(sqrt(rowSums(X.std*X.std)))
-  X.std = X.std/weights
+  # Scale the covariate matrix X so that every row of X has euclidean norm <= 1.
+  X.scaled = scale(X, center = FALSE, scale = TRUE)
+  weights = max(sqrt(rowSums(X.scaled*X.scaled)))
+  X.std = X.scaled/weights
 
   # Weights to back scale beta corresponding to the original covariates.
-  weights.beta = apply(X, 2, sd)*weights
+  weights.beta = attr(X.scaled, "scaled:scale")*weights
 
   # Call C++ function monotoneSIM_c to perform an MCMC algorithm to get samples from the posterior distribution of xi, beta and sigma_sq
   out = monotoneSIM_c(y, X.std, beta.std, xi.init, Sigma.xi, knots, monotone, iter.HMC, sigma.sq.beta,
                       sigma.sq.eps, a.eps, b.eps, Burn.in, M)
 
   # Back scale beta corresponding to the original covariates
-  beta.backscaled = out$beta / weights.beta
+  beta.backscaled = t( t(out$beta) / weights.beta )
+
+  #Adjust the back-scaled betas to have unit euclidean norm
+  norms.beta = sqrt(rowSums(beta.backscaled * beta.backscaled))
+  beta.backscaled = beta.backscaled / norms.beta
 
   # If grid values of x are not provided, take a grid of size = size.grid.x with equispaced values from -1 and 1.
   if (is.null(grid.x)){

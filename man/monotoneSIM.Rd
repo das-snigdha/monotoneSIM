@@ -13,7 +13,7 @@ monotoneSIM(
   knots,
   monotone = TRUE,
   iter.HMC = 10,
-  sigma.sq.beta = 10,
+  sigma.sq.beta = 1,
   sigma.sq.eps = 1,
   a.eps = 1,
   b.eps = 1,
