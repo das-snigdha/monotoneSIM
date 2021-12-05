@@ -21,7 +21,7 @@
 #' @export
 #'
 #' @examples
-monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots, monotone = TRUE, iter.HMC = 10,
+monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monotone = TRUE, iter.HMC = 10,
                        sigma.sq.beta = 1, sigma.sq.eps = 1, a.eps = 1.0, b.eps = 1.0,
                        Burn.in = 100, M = 1000, grid.x = NULL, size.grid.x = 100){
   #Compatibility Checks
@@ -37,6 +37,23 @@ monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots, monotone = TRU
 
   # Weights to back scale beta corresponding to the original covariates.
   weights.beta = attr(X.scaled, "scaled:scale")*weights
+
+  # If knots are not provided, take equispaced knots between -1 and 1 of length as that of xi.init.
+  if(is.null(knots)){
+    knots = seq(-1, 1, length.out = length(xi.init))
+  }
+  else{
+    knots = as.vector(knots)
+    #If provided, throw an error if length does not match the length of xi.init.
+    if(length(knots) != length(xi)){
+      stop("Number of knots should be same as that of basis coefficients.")
+    }
+
+    #sort them in ascending order and throw an error if min(knots) != -1 and max(knots) != 1.
+    knots = sort(knots)
+    if(min(knots) != -1 || max(knots) != 1)
+      stop("Knots should be lie in [-1, 1].")
+  }
 
   # Call C++ function monotoneSIM_c to perform an MCMC algorithm to get samples from the posterior distribution of xi, beta and sigma_sq
   out = monotoneSIM_c(y, X.std, beta.std, xi.init, Sigma.xi, knots, monotone, iter.HMC, sigma.sq.beta,
@@ -62,6 +79,5 @@ monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots, monotone = TRU
   g.sample = g_mtx(out$xi, grid.x, knots)
 
   # return xi, beta, sigma.sq.eps, estimated g(x) and grid.x
-  return(list("xi" = out$xi, "beta" = beta.backscaled, "beta.scaled" = out$beta, "sigma.sq.eps" = out$sigma_sq_eps,
-              "X.standardized" = X.std, "g.estimated" = g.sample, "grid.x" = grid.x))
+  return(list("xi" = out$xi, "beta" = beta.backscaled, "beta.scaled" = out$beta, "sigma.sq.eps" = out$sigma_sq_eps, "X.scaled" = X.std, "g.estimated" = g.sample, "grid.x" = grid.x, "knots" = knots))
 }

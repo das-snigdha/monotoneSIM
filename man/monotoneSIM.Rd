@@ -10,7 +10,7 @@ monotoneSIM(
   beta.init,
   xi.init,
   Sigma.xi,
-  knots,
+  knots = NULL,
   monotone = TRUE,
   iter.HMC = 10,
   sigma.sq.beta = 1,
