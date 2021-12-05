@@ -18,9 +18,7 @@ monotoneSIM(
   a.eps = 1,
   b.eps = 1,
   Burn.in = 100,
-  M = 1000,
-  grid.x = NULL,
-  size.grid.x = 100
+  M = 1000
 )
 }
 \arguments{

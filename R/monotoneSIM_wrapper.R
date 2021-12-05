@@ -23,7 +23,7 @@
 #' @examples
 monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monotone = TRUE, iter.HMC = 10,
                        sigma.sq.beta = 1, sigma.sq.eps = 1, a.eps = 1.0, b.eps = 1.0,
-                       Burn.in = 100, M = 1000, grid.x = NULL, size.grid.x = 100){
+                       Burn.in = 100, M = 1000){
   #Compatibility Checks
 
   # Standardize x and beta.init
@@ -66,18 +66,6 @@ monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monoton
   norms.beta = sqrt(rowSums(beta.backscaled * beta.backscaled))
   beta.backscaled = beta.backscaled / norms.beta
 
-  # If grid values of x are not provided, take a grid of size = size.grid.x with equispaced values from -1 and 1.
-  if (is.null(grid.x)){
-    grid.x = seq(-1, 1, length.out = size.grid.x)
-  }
-  else{
-    # If provided, convert grid.x into a vector
-    grid.x = as.vector(grid.x)
-  }
-
-  # Call c++ function g_mtx to calculate g(x) for the grid.x using xi's obtained from the MCMC.
-  g.sample = g_mtx(out$xi, grid.x, knots)
-
-  # return xi, beta, sigma.sq.eps, estimated g(x) and grid.x
-  return(list("xi" = out$xi, "beta" = beta.backscaled, "beta.scaled" = out$beta, "sigma.sq.eps" = out$sigma_sq_eps, "X.scaled" = X.std, "g.estimated" = g.sample, "grid.x" = grid.x, "knots" = knots))
+  # return xi, beta.backscaled, beta, sigma.sq.eps, X.std and knots
+  return(list("xi" = out$xi, "beta" = beta.backscaled, "beta.Xscaled" = out$beta, "sigma.sq.eps" = out$sigma_sq_eps, "X.scaled" = X.std, "knots" = knots))
 }
