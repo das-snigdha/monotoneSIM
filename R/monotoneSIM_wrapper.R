@@ -2,7 +2,7 @@
 #'
 #' @param y \eqn{n x 1} Vector of Response Variable.
 #'
-#' @param X \eqn{n x p} Matrix of Covariates. Each row represents a \eqn{p x 1} covariate vector.
+#' @param X \eqn{n x p} Matrix of Predictors. Each row represents a \eqn{p x 1} predictor vector.
 #'
 #' @param beta.init \eqn{p x 1} Vector; Starting value of beta for the algorithm.
 #'
@@ -18,7 +18,7 @@
 #'
 #' @param sigma.sq.beta Scalar; Hyperparameter specifying prior Variance of beta. Takes the value \eqn{1} by default.
 #'
-#' @param sigma.sq.eps  Scalar; Starting of Variance of errors. Takes the value \eqn{1} by default.
+#' @param sigma.sq.eps  Scalar; Starting of Error Variance. Takes the value \eqn{1} by default.
 #'
 #' @param a.eps Scalar; Hyperparameter specifying prior distirbution of sigma.sq.eps. Takes the value \eqn{1} by default.
 #'
@@ -28,7 +28,13 @@
 #'
 #' @param M Positive Integer; required size of the  Markov Chain Monte Carlo sample. Takes the value \eqn{1000} by default.
 #'
-#' @return
+#' @return A list with the following elements.
+#' \item{xi}{ \code{M} \eqn{x (L+1)} Matrix of Basis Coefficients. Each row represent one sample from the Conditional posterior of basis coefficients.}
+#' \item{beta.Xscaled}{ \code{M} \eqn{x p} Matrix of parameters corresponding to scaled covariates. Each row represent one sample from the Conditional posterior of single index parameter.}
+#' \item{beta}{ \code{M} \eqn{x p} Matrix of parameters corresponding to original covariates.}
+#' \item{sigma.sq.eps}{ \code{M} \eqn{x 1} Vector; Sample of size \eqn{M} drawn from the Conditional posterior of the Error Variance.}
+#' \item{X.scaled}{ \eqn{n x p} Matrix of scaled Covariates. Each row has euclidean norm less than or equal to \eqn{1}.}
+#' \item{knots}{  \eqn{(L+1) x 1} Vector of knots used for estimation of the link function.}
 #' @export
 #'
 #' @examples
@@ -78,5 +84,5 @@ monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monoton
   beta.backscaled = beta.backscaled / norms.beta
 
   # return xi, beta.backscaled, beta, sigma.sq.eps, X.std and knots
-  return(list("xi" = out$xi, "beta" = beta.backscaled, "beta.Xscaled" = out$beta, "sigma.sq.eps" = out$sigma_sq_eps, "X.scaled" = X.std, "knots" = knots))
+  return(list("xi" = out$xi, "beta.Xscaled" = out$beta, "beta" = beta.backscaled,  "sigma.sq.eps" = out$sigma_sq_eps, "X.scaled" = X.std, "knots" = knots))
 }
