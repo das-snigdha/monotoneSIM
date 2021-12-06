@@ -24,7 +24,7 @@ monotoneSIM(
 \arguments{
 \item{y}{\eqn{n x 1} Vector of Response Variable.}
 
-\item{X}{\eqn{n x p} Matrix of Covariates. Each row represents a \eqn{p x 1} covariate vector.}
+\item{X}{\eqn{n x p} Matrix of Predictors. Each row represents a \eqn{p x 1} predictor vector.}
 
 \item{beta.init}{\eqn{p x 1} Vector; Starting value of beta for the algorithm.}
 
@@ -40,7 +40,7 @@ monotoneSIM(
 
 \item{sigma.sq.beta}{Scalar; Hyperparameter specifying prior Variance of beta. Takes the value \eqn{1} by default.}
 
-\item{sigma.sq.eps}{Scalar; Starting of Variance of errors. Takes the value \eqn{1} by default.}
+\item{sigma.sq.eps}{Scalar; Starting of Error Variance. Takes the value \eqn{1} by default.}
 
 \item{a.eps}{Scalar; Hyperparameter specifying prior distirbution of sigma.sq.eps. Takes the value \eqn{1} by default.}
 
@@ -51,8 +51,47 @@ monotoneSIM(
 \item{M}{Positive Integer; required size of the  Markov Chain Monte Carlo sample. Takes the value \eqn{1000} by default.}
 }
 \value{
-
+A list with the following elements.
+\item{xi}{ \code{M} \eqn{x (L+1)} Matrix of Basis Coefficients. Each row represent one sample from the Conditional posterior of basis coefficients.}
+\item{beta.Xscaled}{ \code{M} \eqn{x p} Matrix of parameters corresponding to scaled covariates. Each row represent one sample from the Conditional posterior of single index parameter.}
+\item{beta}{ \code{M} \eqn{x p} Matrix of parameters corresponding to original covariates.}
+\item{sigma.sq.eps}{ \code{M} \eqn{x 1} Vector; Sample of size \eqn{M} drawn from the Conditional posterior of the Error Variance.}
+\item{X.scaled}{ \eqn{n x p} Matrix of scaled Covariates. Each row has euclidean norm less than or equal to \eqn{1}.}
+\item{knots}{  \eqn{(L+1) x 1} Vector of knots used for estimation of the link function.}
 }
 \description{
 Bayesian Estimation of Monotone Single Index Models
+}
+\examples{
+n=100; p=3; L = 20
+
+# We take 2 continuous variables and 1 dichotomous attribute as predictors.
+X = matrix(rnorm(n*(p-1)), nrow = n, ncol = (p-1))
+X = cbind(X, rbinom(n, 1, 0.5))
+
+# True Value of the parameter (having unit euclidean norm).
+true.beta = rnorm(p); true.beta = true.beta/ norm(true.beta, "2")
+
+beta.start = rnorm(p)  #Starting value of beta
+xi = abs(rnorm((L+1), 0, 5))   #Starting value of xi
+S_xi = 5*diag(L+1) #Prior Variance of xi
+sigma.sq.eps.start = 0.01 #Starting value of sigma.sq.eps
+
+# True monotone link function
+true.g = function(x){
+y = (x+1)/2
+5*(pnorm(y, mean=0.5, sd=0.1) - pnorm(0, mean = 0.5, sd = 0.1))
+}
+
+# Generate the response
+y.true = true.g(X\%*\%true.beta) + rnorm(n, 0, sqrt(sigma.sq.eps.start))
+
+MCMC.sample = monotoneSIM(y = y.true, X = X, beta.init = beta.start , xi.init = xi, Sigma.xi =  S_xi, monotone = TRUE, sigma.sq.eps = sigma.sq.eps.start , Burn.in = 500, M = 1000)
+
+#Posterior mean of beta
+beta.estimated = colMeans(MCMC.sample$beta); beta.estimated
+true.beta  #Compare with true beta
+
+#Posterior Standard Deviation of beta
+sd.beta = apply(MCMC.sample$beta, 2, sd); sd.beta
 }
