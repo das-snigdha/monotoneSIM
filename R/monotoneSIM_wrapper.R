@@ -1,21 +1,32 @@
 #' Bayesian Estimation of Monotone Single Index Models
 #'
-#' @param y
-#' @param X
-#' @param beta.init
-#' @param xi.init
-#' @param Sigma.xi
-#' @param knots
-#' @param monotone
-#' @param iter.HMC
-#' @param sigma.sq.beta
-#' @param sigma.sq.eps
-#' @param a.eps
-#' @param b.eps
-#' @param Burn.in
-#' @param M
-#' @param grid.x
-#' @param size.grid.x
+#' @param y \eqn{n x 1} Vector of Response Variable.
+#'
+#' @param X \eqn{n x p} Matrix of Covariates. Each row represents a \eqn{p x 1} covariate vector.
+#'
+#' @param beta.init \eqn{p x 1} Vector; Starting value of beta for the algorithm.
+#'
+#' @param xi.init \eqn{(L+1) x 1} Vector; Starting value of Basis Coefficients for the algorithm.
+#'
+#' @param Sigma.xi \eqn{(L+1) X (L+1)} Matrix; Hyperparameter specifying prior Variance of xi.
+#'
+#' @param knots \eqn{(L+1) X 1} Vector of user supplied knots. Takes \code{NULL} by default. If \code{NULL}, equispaced knots in \eqn{[-1, 1]} are chosen for the algorithm.
+#'
+#' @param monotone  Logical; Takes \code{TRUE} by default. If \code{TRUE}, the link function is taken to be monotone and the posterior of xi is drawn from a Truncated Normal distribution by an exact Hamiltonian Monte Carlo algorithm. If \code{FALSE},  the posterior of xi is drawn from a Normal distribution.
+#'
+#' @param iter.HMC  Number of iterations of the Hamiltonian Monte Carlo algorithm in Truncated Normal sampling if \code{monotone = TRUE}. Takes the value \eqn{10} by default.
+#'
+#' @param sigma.sq.beta Scalar; Hyperparameter specifying prior Variance of beta. Takes the value \eqn{1} by default.
+#'
+#' @param sigma.sq.eps  Scalar; Starting of Variance of errors. Takes the value \eqn{1} by default.
+#'
+#' @param a.eps Scalar; Hyperparameter specifying prior distirbution of sigma.sq.eps. Takes the value \eqn{1} by default.
+#'
+#' @param b.eps Scalar; Hyperparameter specifying prior distirbution of sigma.sq.eps. Takes the value \eqn{1} by default.
+#'
+#' @param Burn.in Non-negative Integer; Burn-in period of the Markov Chain Monte Carlo algorithm. Takes the value \eqn{100} by default.
+#'
+#' @param M Positive Integer; required size of the  Markov Chain Monte Carlo sample. Takes the value \eqn{1000} by default.
 #'
 #' @return
 #' @export

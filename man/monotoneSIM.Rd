@@ -22,7 +22,33 @@ monotoneSIM(
 )
 }
 \arguments{
-\item{size.grid.x}{}
+\item{y}{\eqn{n x 1} Vector of Response Variable.}
+
+\item{X}{\eqn{n x p} Matrix of Covariates. Each row represents a \eqn{p x 1} covariate vector.}
+
+\item{beta.init}{\eqn{p x 1} Vector; Starting value of beta for the algorithm.}
+
+\item{xi.init}{\eqn{(L+1) x 1} Vector; Starting value of Basis Coefficients for the algorithm.}
+
+\item{Sigma.xi}{\eqn{(L+1) X (L+1)} Matrix; Hyperparameter specifying prior Variance of xi.}
+
+\item{knots}{\eqn{(L+1) X 1} Vector of user supplied knots. Takes \code{NULL} by default. If \code{NULL}, equispaced knots in \eqn{[-1, 1]} are chosen for the algorithm.}
+
+\item{monotone}{Logical; Takes \code{TRUE} by default. If \code{TRUE}, the link function is taken to be monotone and the posterior of xi is drawn from a Truncated Normal distribution by an exact Hamiltonian Monte Carlo algorithm. If \code{FALSE},  the posterior of xi is drawn from a Normal distribution.}
+
+\item{iter.HMC}{Number of iterations of the Hamiltonian Monte Carlo algorithm in Truncated Normal sampling if \code{monotone = TRUE}. Takes the value \eqn{10} by default.}
+
+\item{sigma.sq.beta}{Scalar; Hyperparameter specifying prior Variance of beta. Takes the value \eqn{1} by default.}
+
+\item{sigma.sq.eps}{Scalar; Starting of Variance of errors. Takes the value \eqn{1} by default.}
+
+\item{a.eps}{Scalar; Hyperparameter specifying prior distirbution of sigma.sq.eps. Takes the value \eqn{1} by default.}
+
+\item{b.eps}{Scalar; Hyperparameter specifying prior distirbution of sigma.sq.eps. Takes the value \eqn{1} by default.}
+
+\item{Burn.in}{Non-negative Integer; Burn-in period of the Markov Chain Monte Carlo algorithm. Takes the value \eqn{100} by default.}
+
+\item{M}{Positive Integer; required size of the  Markov Chain Monte Carlo sample. Takes the value \eqn{1000} by default.}
 }
 \value{
 
