@@ -1,8 +1,8 @@
 #' Extract Fitted values after Bayesian estimation of a Monotone Single Index Model.
 #'
 #' @param mono.sim A returned object of \code{\link{monotoneSIM}} function.
-#' @param size.grid.x length of vector of values for which the monotone function is estimated. Takes the value \eqn{100} by default.
-#' @param grid.x (Optional) Vector of user supplied values for which the monotone function is estimated. Takes \code{NULL} by default. If \code{NULL}, vector (of length size.grid.x) of equispaced values between -1 and 1 are chosen.
+#' @param size.grid.x length of vector of values for which the link function is estimated. Takes the value \eqn{100} by default.
+#' @param grid.x (Optional) Vector of user supplied values for which the link function is estimated. Takes \code{NULL} by default. If \code{NULL}, vector (of length size.grid.x) of equispaced values between -1 and 1 are chosen.
 #'
 #' @return A list with the following elements.
 #' \item{Y.fitted}{ \code{M} \eqn{x n} Matrix of Fitted values of the response. \code{M} is the size of the MCMC sample obtained in \code{monotoneSIM}. }
@@ -35,7 +35,7 @@
 #'
 #' MCMC.sample = monotoneSIM(y = y.true, X = X, beta.init = beta.start,
 #'   xi.init = xi, Sigma.xi =  S_xi, monotone = TRUE,
-#'   sigma.sq.eps = sigma.sq.eps.start , Burn.in = 100, M = 500)
+#'   sigma.sq.eps.init = sigma.sq.eps.start , Burn.in = 100, M = 500)
 #'
 #' fit = monotoneFIT(MCMC.sample)
 #'
@@ -66,6 +66,11 @@
 #'   col = c("black", "red"), lwd = c(1,3))
 
 monotoneFIT = function(mono.sim, size.grid.x = 100, grid.x = NULL){
+
+  #Check if size.grid.x is a positive integer
+  if(size.grid.x <= 0 || size.grid.x != as.integer(size.grid.x)){
+    stop("Number of values at which the link function is estimated should be a positive integer.")
+  }
 
   # If grid values of x are not provided, take a grid of size = size.grid.x with equispaced values from -1 and 1.
   if (is.null(grid.x)){

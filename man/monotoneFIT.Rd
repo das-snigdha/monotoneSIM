@@ -9,9 +9,9 @@ monotoneFIT(mono.sim, size.grid.x = 100, grid.x = NULL)
 \arguments{
 \item{mono.sim}{A returned object of \code{\link{monotoneSIM}} function.}
 
-\item{size.grid.x}{length of vector of values for which the monotone function is estimated. Takes the value \eqn{100} by default.}
+\item{size.grid.x}{length of vector of values for which the link function is estimated. Takes the value \eqn{100} by default.}
 
-\item{grid.x}{(Optional) Vector of user supplied values for which the monotone function is estimated. Takes \code{NULL} by default. If \code{NULL}, vector (of length size.grid.x) of equispaced values between -1 and 1 are chosen.}
+\item{grid.x}{(Optional) Vector of user supplied values for which the link function is estimated. Takes \code{NULL} by default. If \code{NULL}, vector (of length size.grid.x) of equispaced values between -1 and 1 are chosen.}
 }
 \value{
 A list with the following elements.
@@ -47,7 +47,7 @@ y.true = true.g(X\%*\%true.beta) + rnorm(n, 0, sqrt(sigma.sq.eps.start))
 
 MCMC.sample = monotoneSIM(y = y.true, X = X, beta.init = beta.start,
   xi.init = xi, Sigma.xi =  S_xi, monotone = TRUE,
-  sigma.sq.eps = sigma.sq.eps.start , Burn.in = 100, M = 500)
+  sigma.sq.eps.init = sigma.sq.eps.start , Burn.in = 100, M = 500)
 
 fit = monotoneFIT(MCMC.sample)
 
