@@ -31,9 +31,9 @@
 #' @return A list with the following elements.
 #' \item{xi}{ \code{M} \eqn{x (L+1)} Matrix of Basis Coefficients. Each row represent one sample from the Conditional posterior of basis coefficients.}
 #' \item{beta.Xscaled}{ \code{M} \eqn{x p} Matrix of parameters corresponding to scaled covariates. Each row represent one sample from the Conditional posterior of single index parameter.}
-#' \item{beta}{ \code{M} \eqn{x p} Matrix of parameters corresponding to original covariates.}
+#' \item{beta}{ \code{M} \eqn{x p} Matrix of parameters corresponding to original predictors.}
 #' \item{sigma.sq.eps}{ \code{M} \eqn{x 1} Vector; Sample of size \eqn{M} drawn from the Conditional posterior of the Error Variance.}
-#' \item{X.scaled}{ \eqn{n x p} Matrix of scaled Covariates. Each row has euclidean norm less than or equal to \eqn{1}.}
+#' \item{X.scaled}{ \eqn{n x p} Matrix of scaled predictors. Each row has euclidean norm less than or equal to \eqn{1}.}
 #' \item{knots}{  \eqn{(L+1) x 1} Vector of knots used for estimation of the link function.}
 #' @export
 #'
@@ -123,15 +123,15 @@ monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monoton
   }
 
   # Check if supplied number of HMC iterations is a positive integer
-  if(iter.HMC <= 0 && iter.HMC != as.integer(iter.HMC)){
+  if(iter.HMC <= 0 || iter.HMC != as.integer(iter.HMC)){
     stop("Number of iterations of Hamiltonian Monte Carlo Algorithm should be a positive integer.")
   }
   # Check if supplied size of MCMC sample is a positive integer
-  if(M <= 0 && M != as.integer(M)){
+  if(M <= 0 || M != as.integer(M)){
     stop("Required size of the Markov Chain Monte Carlo sample should be a positive integer.")
   }
   # Check if supplied size of MCMC sample is a positive integer
-  if(Burn.in < 0 && Burn.in != as.integer(Burn.in)){
+  if(Burn.in < 0 || Burn.in != as.integer(Burn.in)){
     stop("Burn in period of the Markov Chain Monte Carlo algorithm should be a non-negative integer.")
   }
   # Check if hyperparameters specifying the prior distribution of sigma.sq.eps are positive

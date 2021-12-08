@@ -54,9 +54,9 @@ monotoneSIM(
 A list with the following elements.
 \item{xi}{ \code{M} \eqn{x (L+1)} Matrix of Basis Coefficients. Each row represent one sample from the Conditional posterior of basis coefficients.}
 \item{beta.Xscaled}{ \code{M} \eqn{x p} Matrix of parameters corresponding to scaled covariates. Each row represent one sample from the Conditional posterior of single index parameter.}
-\item{beta}{ \code{M} \eqn{x p} Matrix of parameters corresponding to original covariates.}
+\item{beta}{ \code{M} \eqn{x p} Matrix of parameters corresponding to original predictors.}
 \item{sigma.sq.eps}{ \code{M} \eqn{x 1} Vector; Sample of size \eqn{M} drawn from the Conditional posterior of the Error Variance.}
-\item{X.scaled}{ \eqn{n x p} Matrix of scaled Covariates. Each row has euclidean norm less than or equal to \eqn{1}.}
+\item{X.scaled}{ \eqn{n x p} Matrix of scaled predictors. Each row has euclidean norm less than or equal to \eqn{1}.}
 \item{knots}{  \eqn{(L+1) x 1} Vector of knots used for estimation of the link function.}
 }
 \description{
