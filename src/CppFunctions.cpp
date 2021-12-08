@@ -141,7 +141,7 @@ double log_L(const NumericVector& y, const NumericVector& Xbeta,
 // beta_init : px1 starting value of beta, having unit Euclidean norm
 // u : vector of knots ranging from -1 to 1
 // sigma_sq_eps : error variance of the model
-// sigma_sq_beta : Prior variance of beta, set to 10000, by default
+// sigma_sq_beta : Prior variance of beta
 List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVector& xi,
                  const NumericVector&  beta_init, const NumericVector& u, double sigma_sq_eps,
                  double sigma_sq_beta){
@@ -152,7 +152,7 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
   NumericVector beta(p), beta_tilde(p), beta_new(p), beta_tilde_new(p), Xbeta(n), Xbeta_new(n), nu(p) ;
 
   // Set the starting values of beta, beta_tilde and Xbeta = X * beta
-  vec_mem_cpy(beta_init, beta) ;
+  vec_copy(beta_init, beta) ;
   beta_tilde = sqrt((double)p*sigma_sq_beta)*beta ;
   product(X, beta, Xbeta) ;
 
@@ -193,9 +193,9 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
   }
 
   // Set beta, beta_tilde and Xbeta as the final values obtained from the algorithm
-  vec_mem_cpy(beta_new, beta) ;
-  vec_mem_cpy(beta_tilde_new, beta_tilde) ;
-  vec_mem_cpy(Xbeta_new, Xbeta) ;
+  vec_copy(beta_new, beta) ;
+  vec_copy(beta_tilde_new, beta_tilde) ;
+  vec_copy(Xbeta_new, Xbeta) ;
 
   return(List::create(Named("beta") = beta, Named("beta_tilde") = beta_tilde, Named("Xbeta") = Xbeta));
 }
@@ -236,8 +236,8 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
   for(int nn=0; nn<n+n_burn; nn++){
 
     s = rnorm(d) ;    // Draw s ~ Normal(0, I_d)
-    vec_mem_cpy(s, a) ;   // a = s
-    vec_mem_cpy(x, b) ;   // b = s
+    vec_copy(s, a) ;   // a = s
+    vec_copy(x, b) ;   // b = s
 
     T_end = PI/2.0 ;    // T_end = PI/2, end time point
 
@@ -292,7 +292,7 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
           a[i] = x_dot[i] - 2.0*alpha_h*f(h,i) ;
 
         // Set b_i = x_i
-        vec_mem_cpy(x, b) ;
+        vec_copy(x, b) ;
 
         // Decrease the end time point by T_h
         T_end -= T_h ;
@@ -326,7 +326,7 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
 // Sigma_xi : Prior variance of xi
 // u : vector of knots ranging from -1 to 1
 // sigma_sq_eps : error variance of the model
-// monotone : TRUE OR FALSE denoting whether the single index function is monotone or not. Takes FALSE by default
+// monotone : TRUE OR FALSE denoting whether the single index function is monotone or not
 // n_HMC : number of the HMC iterations in truncated normal sampling
 NumericVector update_xi(const NumericVector& y, const NumericVector& Xbeta, const NumericVector& xi_init,
                const NumericMatrix& Sigma_xi, const NumericVector& u, double sigma_sq_eps,
@@ -405,7 +405,7 @@ double update_sigma_sq_eps(const NumericVector& y, const NumericVector& Xbeta, c
 // xi_init: (L+1)x1 vector containing starting value of coefficients that construct the single index function
 // Sigma_xi : Prior variance of xi
 // u : vector of knots ranging from -1 to 1
-// monotone : TRUE OR FALSE denoting whether the single index function is monotone or not. Takes FALSE by default
+// monotone : TRUE OR FALSE denoting whether the single index function is monotone or not
 // n_HMC : number of the HMC iterations in truncated normal sampling
 // sigma_sq_beta : Prior variance of beta
 // sigma_sq_eps_init : Starting value of error variance of the model
@@ -426,8 +426,8 @@ List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const Numeric
   NumericMatrix xi_mtx(M,L+1), beta_mtx(M,p) ;
 
   // Copy the initial provided values of xi, beta and sigma_sq_eps and calculate Xbeta
-  vec_mem_cpy(xi_init, xi) ;
-  vec_mem_cpy(beta_init, beta) ;
+  vec_copy(xi_init, xi) ;
+  vec_copy(beta_init, beta) ;
   product(X, beta, Xbeta) ;
   sigma_sq_eps = sigma_sq_eps_init ;
 
@@ -455,9 +455,9 @@ List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const Numeric
 }
 
 // Function to calculate the value of g(x) for a grid of x values and xi vectors.
-// xi_mtx : Matrix whose rows contain (L+1)X1 vector xi_j, j = 1(1)M
-// grid_x : NX1 vector contaning the x-values
-// u : (L+1)X1 vector of knots from -1 to 1
+// xi_mtx : Matrix whose rows contain (L+1)x1 vector xi_j, j = 1(1)M
+// grid_x : Nx1 vector contaning the x-values
+// u : (L+1)x1 vector of knots from -1 to 1
 // [[Rcpp::export]]
 NumericMatrix g_mtx(const NumericMatrix& xi_mtx,const NumericVector& grid_x, const NumericVector& u){
   // Initialize variables
