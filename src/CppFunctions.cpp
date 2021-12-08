@@ -7,6 +7,7 @@
 using namespace Rcpp;
 
 // Triangular basis function h(x) = (1-|x|)_+
+// x : value at which h(.) is evaluated
 double h(double x){
   if(x > -1 && x < 1)
     return(1.0 - abs(x));   // return (1-|x|) if -1 <= x <= 1
@@ -15,6 +16,9 @@ double h(double x){
 }
 
 // h_l(.) = B-spline basis function of order 2
+// x : value at which h_l(.) is evaluated
+// l : index ranging from 0 to (#knots - 1)
+// u : vector of specified knots from -1 to 1
 double h_l(double x, int l, const NumericVector& u){
   if(x < u[l]){
     // if x < u_l  then h_l((x - u_l)/(u_l - u_{l-1}))
@@ -40,6 +44,7 @@ double h_l(double x, int l, const NumericVector& u){
 }
 
 // \psi(x) = \int_{-1}^x h(t) dt
+// x : value at which \psi(.) is evaluated
 double psi(double x){
   if( x < -1.0 )
     return(0.0) ;   // return 0 for x < -1
@@ -52,6 +57,8 @@ double psi(double x){
 }
 
 // psi_l(x) = \int_{-1}^x h_l(t) dt
+// l : index ranging from 0 to (#knots - 1)
+// u : specified knots from -1 to 1
 double psi_l(double x, int l, const NumericVector& u){
   if(l==0){
     // specific algerba for psi_0
@@ -90,8 +97,9 @@ double psi_l(double x, int l, const NumericVector& u){
 
 // Monotone single index function as a B-Spline basis expansion.
 // g(x) = \sum_{l=0}^L \xi_l * \psi_l(x)
-// Here, u is a vector of specified knots from -1 to 1
-// [[Rcpp::export]]
+// x : value at which g(.) is evaluated
+// xi : vector of basis coefficients
+// u : vector of specified knots from -1 to 1
 double g(double x, const NumericVector& xi, const NumericVector& u){
   if(x > 1.0)
     return(g(1.0, xi, u)) ;   // If x>1, g(x) = g(1)
@@ -107,6 +115,12 @@ double g(double x, const NumericVector& xi, const NumericVector& u){
 
 // log likelihood function of beta
 // log_L =  -(1/2*\sigma_sq_eps) \sum_{i=1}^n (y_i - g(X_i^{\top}\beta))^2
+// y : nx1 response variable
+// X : nxp matrix of covariates
+// Xbeta : nx1 vector containing X*beta, X: nxp matrix of covariates, beta: px1 predictors
+// xi : (L+1)x1 vector of coefficients to contruct the single index function
+// u : vector of knots ranging from -1 to 1
+// sigma_sq_eps : error variance of the model
 double log_L(const NumericVector& y, const NumericVector& Xbeta,
              const NumericVector& xi, double sigma_sq_eps, const NumericVector& u){
   double res=0.0, tmp ;
@@ -130,7 +144,7 @@ double log_L(const NumericVector& y, const NumericVector& Xbeta,
 // sigma_sq_beta : Prior variance of beta, set to 10000, by default
 List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVector& xi,
                  const NumericVector&  beta_init, const NumericVector& u, double sigma_sq_eps,
-                 double sigma_sq_beta=10000.0){
+                 double sigma_sq_beta){
 
   // Initialize the required variables
   int n=X.nrow(), p=X.ncol() ;
@@ -190,11 +204,13 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
 // x_init ~ d-variate Normal(mu, Sigma)
 // constraints: <ff(j,_), x_init> + gg[j] \geq 0, j=1,...,m
 // n: required sample size
+// mu, Sigma : Parameters of the normal distribution
+// x_init : initial value of the observation that follows the d-variate Normal distribution
+// ff, gg : functions that define constraints
 // n_burn : Burn in period of the Monte Carlo Algorithm
-// [[Rcpp::export]]
 NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& Sigma,
                           const NumericVector& x_init, const NumericMatrix& ff,
-                          const NumericVector& gg, int n_burn=0){
+                          const NumericVector& gg, int n_burn){
 
   // Initialize required varaibles
   int d=mu.size(), m=ff.nrow(), h ;
@@ -314,7 +330,7 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
 // n_HMC : number of the HMC iterations in truncated normal sampling
 NumericVector update_xi(const NumericVector& y, const NumericVector& Xbeta, const NumericVector& xi_init,
                const NumericMatrix& Sigma_xi, const NumericVector& u, double sigma_sq_eps,
-               bool monotone=false, int n_HMC=10){
+               bool monotone, int n_HMC){
 
   // Initialize required variables
   int n = y.size(), L = xi_init.size() - 1 ;
@@ -367,7 +383,7 @@ NumericVector update_xi(const NumericVector& y, const NumericVector& Xbeta, cons
 // u : vector of knots ranging from -1 to 1
 // a_eps, b_eps : Hyperparameters specifying Prior distribution of sigma_sq_eps which is Inv Gamma(a_eps, b_eps)
 double update_sigma_sq_eps(const NumericVector& y, const NumericVector& Xbeta, const NumericVector& xi,
-                           const NumericVector& u, double a_eps=1.0, double b_eps=1.0){
+                           const NumericVector& u, double a_eps, double b_eps){
 
   // Initialize required variables
   int n = y.size();
@@ -399,9 +415,8 @@ double update_sigma_sq_eps(const NumericVector& y, const NumericVector& Xbeta, c
 // [[Rcpp::export]]
 List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const NumericVector& beta_init,
                    const NumericVector& xi_init, const NumericMatrix& Sigma_xi, const NumericVector& u,
-                   bool monotone=false, int n_HMC=10, double sigma_sq_beta=10000.0,
-                   double sigma_sq_eps_init=0.01, double a_eps=1.0, double b_eps=1.0,
-                   int M_burn=100, int M=1000){
+                   bool monotone, int n_HMC, double sigma_sq_beta, double sigma_sq_eps_init,
+                   double a_eps, double b_eps, int M_burn, int M){
 
   // Initialize required variables
   int n=y.size(), p=X.ncol(), L=xi_init.size()-1 ;
@@ -442,7 +457,7 @@ List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const Numeric
 // Function to calculate the value of g(x) for a grid of x values and xi vectors.
 // xi_mtx : Matrix whose rows contain (L+1)X1 vector xi_j, j = 1(1)M
 // grid_x : NX1 vector contaning the x-values
-// u : L+1)X1 vector of knots from -1 to 1
+// u : (L+1)X1 vector of knots from -1 to 1
 // [[Rcpp::export]]
 NumericMatrix g_mtx(const NumericMatrix& xi_mtx,const NumericVector& grid_x, const NumericVector& u){
   // Initialize variables

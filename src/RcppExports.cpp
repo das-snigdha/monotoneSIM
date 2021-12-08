@@ -11,36 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// g
-double g(double x, const NumericVector& xi, const NumericVector& u);
-RcppExport SEXP _monotoneSIM_g(SEXP xSEXP, SEXP xiSEXP, SEXP uSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type xi(xiSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type u(uSEXP);
-    rcpp_result_gen = Rcpp::wrap(g(x, xi, u));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rtmvnormHMC
-NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& Sigma, const NumericVector& x_init, const NumericMatrix& ff, const NumericVector& gg, int n_burn);
-RcppExport SEXP _monotoneSIM_rtmvnormHMC(SEXP nSEXP, SEXP muSEXP, SEXP SigmaSEXP, SEXP x_initSEXP, SEXP ffSEXP, SEXP ggSEXP, SEXP n_burnSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type Sigma(SigmaSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type x_init(x_initSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type ff(ffSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type gg(ggSEXP);
-    Rcpp::traits::input_parameter< int >::type n_burn(n_burnSEXP);
-    rcpp_result_gen = Rcpp::wrap(rtmvnormHMC(n, mu, Sigma, x_init, ff, gg, n_burn));
-    return rcpp_result_gen;
-END_RCPP
-}
 // monotoneSIM_c
 List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const NumericVector& beta_init, const NumericVector& xi_init, const NumericMatrix& Sigma_xi, const NumericVector& u, bool monotone, int n_HMC, double sigma_sq_beta, double sigma_sq_eps_init, double a_eps, double b_eps, int M_burn, int M);
 RcppExport SEXP _monotoneSIM_monotoneSIM_c(SEXP ySEXP, SEXP XSEXP, SEXP beta_initSEXP, SEXP xi_initSEXP, SEXP Sigma_xiSEXP, SEXP uSEXP, SEXP monotoneSEXP, SEXP n_HMCSEXP, SEXP sigma_sq_betaSEXP, SEXP sigma_sq_eps_initSEXP, SEXP a_epsSEXP, SEXP b_epsSEXP, SEXP M_burnSEXP, SEXP MSEXP) {
@@ -80,8 +50,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_monotoneSIM_g", (DL_FUNC) &_monotoneSIM_g, 3},
-    {"_monotoneSIM_rtmvnormHMC", (DL_FUNC) &_monotoneSIM_rtmvnormHMC, 7},
     {"_monotoneSIM_monotoneSIM_c", (DL_FUNC) &_monotoneSIM_monotoneSIM_c, 14},
     {"_monotoneSIM_g_mtx", (DL_FUNC) &_monotoneSIM_g_mtx, 3},
     {NULL, NULL, 0}
