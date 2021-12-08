@@ -75,9 +75,36 @@
 monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monotone = TRUE, iter.HMC = 10,
                        sigma.sq.beta = 1, sigma.sq.eps = 1, a.eps = 1.0, b.eps = 1.0,
                        Burn.in = 100, M = 1000){
-  #Compatibility Checks
 
-  # Standardize x and beta.init
+  # Convert y, beta.init and xi.init into vectors
+  y = as.vector(y);
+  beta.init = as.vector(beta.init);
+  xi.init = as.vector(xi.init)
+
+  # Convert X and Sigma.xi into matrices
+  X = as.matrix(X);
+  Sigma.xi = as.matrix(Sigma.xi)
+
+  n = nrow(X); p = ncol(X); L = length(xi.init)
+
+  # Compatibility Checks
+  # Check if dimensions of y and X match
+  if(length(y) != n){
+    stop("Number of responses and predictors do not match.")
+  }
+  # Check if dimensions of beta.init and X match
+  if(length(beta.init) != p){
+    stop("Dimension of predictors and number of parameters do not match.")
+  }
+  # Check if dimensions of Sigma_xi and xi.init match
+  if(nrow(Sigma.xi) != L || ncol(Sigma.xi) != L){
+    stop("Dimensions of basis coefficient vector and its Variance matrix do not match.")
+  }
+  else if(isSymmetric(Sigma.xi) == FALSE){
+    # Check if Sigma_xi is symmetric
+    stop("Variance matrix of basis coefficients is not Symmetric.")
+  }
+
   # scale beta.init so that starting value of beta has unit euclidean norm
   beta.std = beta.init/norm(beta.init, "2")
 
