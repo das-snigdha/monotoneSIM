@@ -33,10 +33,11 @@
 #' # Generate the response
 #' y.true = true.g(X%*%true.beta) + rnorm(n, 0, sqrt(sigma.sq.eps.start))
 #'
-#' MCMC.sample = monotoneSIM(y = y.true, X = X, beta.init = beta.start , xi.init = xi, Sigma.xi =  S_xi,
-#'  monotone = TRUE, sigma.sq.eps = sigma.sq.eps.start , Burn.in = 500, M = 1000)
+#' MCMC.sample = monotoneSIM(y = y.true, X = X, beta.init = beta.start,
+#'   xi.init = xi, Sigma.xi =  S_xi, monotone = TRUE,
+#'   sigma.sq.eps = sigma.sq.eps.start , Burn.in = 100, M = 500)
 #'
-#' fit = monotoneFIT(MCMC.sample, size.grid.x = 100)
+#' fit = monotoneFIT(MCMC.sample)
 #'
 #' # Obtain the fitted response
 #' y.fit = colMeans(fit$Y.fitted)
@@ -46,7 +47,8 @@
 #' plot(Y$y.fit, type = "o", pch = 16, ylab = "Y (Response)", xlab = "",
 #'   main = "Plot of the true and the fitted responses.")
 #' lines(Y$y.true, col = "red", lwd = 3)
-#' legend("topleft", c("Fitted response", "True response"), col = c("black", "red"), lwd = c(1,3))
+#' legend("topleft", c("Fitted response", "True response"),
+#'   col = c("black", "red"), lwd = c(1,3))
 #'
 #' # Obtain the estimated value of the link function g(x)
 #' est.func = colMeans(fit$g.estimated)
@@ -60,7 +62,8 @@
 #' plot(fit$grid.x, est.func, type="l", xlab="grid.x", ylab="Link function, g(x)",
 #'   main = "Plot of the link function, g(x) vs x")
 #' lines(fit$grid.x, true.func, lwd=2, col="red")
-#' legend("topleft", c("Estimated link function", "True link function"), col = c("black", "red"), lwd = c(1,3))
+#' legend("topleft", c("Estimated link function", "True link function"),
+#'   col = c("black", "red"), lwd = c(1,3))
 
 monotoneFIT = function(mono.sim, size.grid.x = 100, grid.x = NULL){
 

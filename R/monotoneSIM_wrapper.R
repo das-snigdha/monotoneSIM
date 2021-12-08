@@ -61,7 +61,9 @@
 #' # Generate the response
 #' y.true = true.g(X%*%true.beta) + rnorm(n, 0, sqrt(sigma.sq.eps.start))
 #'
-#' MCMC.sample = monotoneSIM(y = y.true, X = X, beta.init = beta.start , xi.init = xi, Sigma.xi =  S_xi, monotone = TRUE, sigma.sq.eps = sigma.sq.eps.start , Burn.in = 500, M = 1000)
+#' MCMC.sample = monotoneSIM(y = y.true, X = X, beta.init = beta.start,
+#'   xi.init = xi, Sigma.xi =  S_xi, monotone = TRUE,
+#'   sigma.sq.eps = sigma.sq.eps.start, Burn.in = 100, M = 500)
 #'
 #' #Posterior mean of beta
 #' beta.estimated = colMeans(MCMC.sample$beta); beta.estimated
@@ -94,7 +96,7 @@ monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monoton
   else{
     knots = as.vector(knots)
     #If provided, throw an error if length does not match the length of xi.init.
-    if(length(knots) != length(xi)){
+    if(length(knots) != length(xi.init)){
       stop("Number of knots should be same as that of basis coefficients.")
     }
 
