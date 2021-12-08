@@ -42,19 +42,6 @@ void product(NumericMatrix A, NumericMatrix B, NumericMatrix res){
   }
 }
 
-// Calculate the product of 2 numeric matrices and return it as a matrix
-NumericMatrix product(NumericMatrix A, NumericMatrix B){
-  NumericMatrix res(A.nrow(), B.ncol()) ;
-  for(int i=0; i<A.nrow(); i++)	{
-    for(int j=0; j<B.ncol(); j++)	{
-      res(i,j) = 0.0 ;
-      for(int k=0; k<A.ncol(); k++)
-        res(i,j) += A(i,k)*B(k,j) ;    // perform matrix multiplication
-    }
-  }
-  return(res) ;   // return the resulting matrix
-}
-
 // Multiply a matrix with a vector and store it in "res" vector passed as an argument
 void product(NumericMatrix A, NumericVector x, NumericVector res){
 for(int i=0; i<A.nrow(); i++)	{
@@ -62,17 +49,6 @@ for(int i=0; i<A.nrow(); i++)	{
   for(int j=0; j<A.ncol(); j++)
     res[i] += A(i,j)*x[j] ; // res = A*x
   }
-}
-
-// Multiply a matrix with a vector and return it as a vector
-NumericVector product(NumericMatrix A, NumericVector x){
-  NumericVector res(x.size()) ;
-  for(int i=0; i<A.nrow(); i++)	{
-    res[i] = 0.0 ;
-    for(int j=0; j<A.ncol(); j++)
-      res[i] += A(i,j)*x[j] ;   // res = A*x
-  }
-  return(res) ;
 }
 
 // Multiply a matrix with a scalar and store it in "res" matrix passed as an argument
@@ -89,15 +65,6 @@ void transpose(NumericMatrix A, NumericMatrix t_A){
       t_A(j,i) = A(i,j) ;
 }
 
-// Calculate the transpose of A matrix and return it
-NumericMatrix transpose(NumericMatrix A){
-  NumericMatrix t_A(A.nrow(), A.ncol()) ;
-  for(int i=0; i<A.nrow(); i++)
-    for(int j=0; j<A.ncol(); j++)
-      t_A(j,i) = A(i,j) ;
-  return(t_A) ;
-}
-
 // Calculate Cholesky Decomposition of a matrix and store in a matrix passed as an argument
 void chol(NumericMatrix A, NumericMatrix res){
   int n = A.nrow() ;
@@ -105,17 +72,6 @@ void chol(NumericMatrix A, NumericMatrix res){
   for(int i=0; i<n; i++)
     for(int j=0; j<n; j++)
       res(i,j) = tmp(i,j) ;
-}
-
-// Calculate Cholesky Decomposition of a matrix and return it
-NumericMatrix chol(NumericMatrix A){
-  int n = A.nrow() ;
-  NumericMatrix res(n,n) ;
-  arma::mat tmp = arma::chol(as<arma::mat>(A)) ;
-  for(int i=0; i<n; i++)
-    for(int j=0; j<n; j++)
-      res(i,j) = tmp(i,j) ;
-  return(res) ;
 }
 
 // Calculate the inverse of a matrix and store in a matrix passed as an argument
@@ -162,13 +118,6 @@ double innerProduct(NumericVector x, NumericVector y){
   return(res) ;
 }
 
-// Draw a sample from multivariate Normal (mu, Sigma) and store it in a vector passed as an argument
-NumericVector rmvnorm(NumericVector mu, NumericMatrix Sigma){
-  arma::mat Y = arma::randn(1,mu.size());
-  arma::mat Z = arma::repmat(as<arma::vec>(mu),1,1).t() + Y * arma::chol(as<arma::mat>(Sigma)) ;
-  return(wrap(Z)) ;
-}
-
 // Draw a sample from multivariate Normal (mu, Sigma) and return it
 void rmvnorm(NumericVector mu, NumericMatrix Sigma, NumericVector res){
   arma::mat Y = arma::randn(1,mu.size());
@@ -177,34 +126,9 @@ void rmvnorm(NumericVector mu, NumericMatrix Sigma, NumericVector res){
     res[i] = Z(0,i) ;
 }
 
-// Add a scalar to every element of a matrix and store it in a matrix passed as an argument
-void sum(NumericMatrix A, double b, NumericMatrix res){
-  for(int i=0; i<A.nrow(); i++)
-    for(int j=0; j<A.ncol(); j++)
-      res(i,j) = A(i,j) + b ;
-}
-
 // Add 2 matrices and store it in a matrix passed as an argument
 void sum(NumericMatrix A, NumericMatrix B, NumericMatrix res){
   for(int i=0; i<A.nrow(); i++)
     for(int j=0; j<A.ncol(); j++)
       res(i,j) = A(i,j) + B(i,j) ;
-}
-
-// Add a scalar to every element of a matrix and return it as a matrix
-NumericMatrix sum(NumericMatrix A, double b){
-  NumericMatrix res(A.nrow(), A.ncol()) ;
-  for(int i=0; i<A.nrow(); i++)
-    for(int j=0; j<A.ncol(); j++)
-      res(i,j) = A(i,j) + b ;
-  return(res) ;
-}
-
-// Add 2 matrices and return it as a matrix
-NumericMatrix sum(NumericMatrix A, NumericMatrix B){
-  NumericMatrix res(A.nrow(), A.ncol()) ;
-  for(int i=0; i<A.nrow(); i++)
-    for(int j=0; j<A.ncol(); j++)
-      res(i,j) = A(i,j) + B(i,j) ;
-  return(res) ;
 }
