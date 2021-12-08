@@ -105,6 +105,49 @@ monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monoton
     stop("Variance matrix of basis coefficients is not Symmetric.")
   }
 
+  # If knots are not provided, take equispaced knots between -1 and 1 of length as that of xi.init.
+  if(is.null(knots)){
+    knots = seq(-1, 1, length.out = L)
+  }
+  else{
+    knots = as.vector(knots)
+    #If provided, throw an error if length does not match the length of xi.init.
+    if(length(knots) != L){
+      stop("Number of knots should be same as that of basis coefficients.")
+    }
+
+    #sort them in ascending order and throw an error if min(knots) != -1 and max(knots) != 1.
+    knots = sort(knots)
+    if(min(knots) != -1 || max(knots) != 1)
+      stop("Knots should be lie in [-1, 1].")
+  }
+
+  # Check if supplied number of HMC iterations is a positive integer
+  if(iter.HMC <= 0 && iter.HMC != as.integer(iter.HMC)){
+    stop("Number of iterations of Hamiltonian Monte Carlo Algorithm should be a positive integer.")
+  }
+  # Check if supplied size of MCMC sample is a positive integer
+  if(M <= 0 && M != as.integer(M)){
+    stop("Required size of the Markov Chain Monte Carlo sample should be a positive integer.")
+  }
+  # Check if supplied size of MCMC sample is a positive integer
+  if(Burn.in < 0 && Burn.in != as.integer(Burn.in)){
+    stop("Burn in period of the Markov Chain Monte Carlo algorithm should be a non-negative integer.")
+  }
+  # Check if hyperparameters specifying the prior distribution of sigma.sq.eps are positive
+  if(a.eps <= 0 || b.eps <= 0){
+    stop("Hyperparameters specifying the prior distribution of sigma.sq.eps should be positive.")
+  }
+  # Check if hyperparameter specifying prior variance of beta is positive
+  if(sigma.sq.beta <= 0){
+    stop("Hyperparameter specifying prior variance of beta should be positive.")
+  }
+  # Check if Starting value of error variance is positive
+  if(sigma.sq.eps <= 0){
+    stop("Starting value of error variance should be positive.")
+  }
+
+
   # scale beta.init so that starting value of beta has unit euclidean norm
   beta.std = beta.init/norm(beta.init, "2")
 
@@ -115,23 +158,6 @@ monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monoton
 
   # Weights to back scale beta corresponding to the original covariates.
   weights.beta = attr(X.scaled, "scaled:scale")*weights
-
-  # If knots are not provided, take equispaced knots between -1 and 1 of length as that of xi.init.
-  if(is.null(knots)){
-    knots = seq(-1, 1, length.out = length(xi.init))
-  }
-  else{
-    knots = as.vector(knots)
-    #If provided, throw an error if length does not match the length of xi.init.
-    if(length(knots) != length(xi.init)){
-      stop("Number of knots should be same as that of basis coefficients.")
-    }
-
-    #sort them in ascending order and throw an error if min(knots) != -1 and max(knots) != 1.
-    knots = sort(knots)
-    if(min(knots) != -1 || max(knots) != 1)
-      stop("Knots should be lie in [-1, 1].")
-  }
 
   # Call C++ function monotoneSIM_c to perform an MCMC algorithm to get samples from the posterior distribution of xi, beta and sigma_sq
   out = monotoneSIM_c(y, X.std, beta.std, xi.init, Sigma.xi, knots, monotone, iter.HMC, sigma.sq.beta,
