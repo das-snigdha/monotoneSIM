@@ -1,6 +1,6 @@
 #' Extract Fitted values after Bayesian estimation of a Monotone Single Index Model.
 #'
-#' @param mono.sim A returned object of \code{monotoneSIM} function.
+#' @param mono.sim A returned object of \code{\link{monotoneSIM}} function.
 #' @param size.grid.x length of vector of values for which the monotone function is estimated. Takes the value \eqn{100} by default.
 #' @param grid.x (Optional) Vector of user supplied values for which the monotone function is estimated. Takes \code{NULL} by default. If \code{NULL}, vector (of length size.grid.x) of equispaced values between -1 and 1 are chosen.
 #'
@@ -11,6 +11,57 @@
 #' @export
 #'
 #' @examples
+#' n = 100; p = 3; L = 20
+#' # We take 2 continuous variables and 1 dichotomous attribute as predictors.
+#' X = matrix(rnorm(n*(p-1)), nrow = n, ncol = (p-1))
+#' X = cbind(X, rbinom(n, 1, 0.5))
+#'
+#' # True Value of the parameter (having unit euclidean norm).
+#' true.beta = rnorm(p); true.beta = true.beta/ norm(true.beta, "2")
+#'
+#' beta.start = rnorm(p)  #Starting value of beta
+#' xi = abs(rnorm((L+1), 0, 5))   #Starting value of xi
+#' S_xi = 5*diag(L+1) #Prior Variance of xi
+#' sigma.sq.eps.start = 0.01 #Starting value of sigma.sq.eps
+#'
+#' # True monotone link function
+#' true.g = function(x){
+#'   y = (x+1)/2
+#'   5*(pnorm(y, mean=0.5, sd=0.1) - pnorm(0, mean = 0.5, sd = 0.1))
+#'   }
+#'
+#' # Generate the response
+#' y.true = true.g(X%*%true.beta) + rnorm(n, 0, sqrt(sigma.sq.eps.start))
+#'
+#' MCMC.sample = monotoneSIM(y = y.true, X = X, beta.init = beta.start , xi.init = xi, Sigma.xi =  S_xi,
+#'  monotone = TRUE, sigma.sq.eps = sigma.sq.eps.start , Burn.in = 500, M = 1000)
+#'
+#' fit = monotoneFIT(MCMC.sample, size.grid.x = 100)
+#'
+#' # Obtain the fitted response
+#' y.fit = colMeans(fit$Y.fitted)
+#'
+#' # Plot the fitted and true values of the response
+#' Y = data.frame(y.true, y.fit); Y = Y[order(y.true), ]
+#' plot(Y$y.fit, type = "o", pch = 16, ylab = "Y (Response)", xlab = "",
+#'   main = "Plot of the true and the fitted responses.")
+#' lines(Y$y.true, col = "red", lwd = 3)
+#' legend("topleft", c("Fitted response", "True response"), col = c("black", "red"), lwd = c(1,3))
+#'
+#' # Obtain the estimated value of the link function g(x)
+#' est.func = colMeans(fit$g.estimated)
+#'
+#' # Calculate the true value of g(x) for each x in grid.x
+#' true.func = rep(0,length(est.func))
+#' for(i in 1:length(est.func))
+#'   true.func[i] = true.g(fit$grid.x[i])
+#'
+#' # Plot the estimated and the true link function vs grid.x
+#' plot(fit$grid.x, est.func, type="l", xlab="grid.x", ylab="Link function, g(x)",
+#'   main = "Plot of the link function, g(x) vs x")
+#' lines(fit$grid.x, true.func, lwd=2, col="red")
+#' legend("topleft", c("Estimated link function", "True link function"), col = c("black", "red"), lwd = c(1,3))
+
 monotoneFIT = function(mono.sim, size.grid.x = 100, grid.x = NULL){
 
   # If grid values of x are not provided, take a grid of size = size.grid.x with equispaced values from -1 and 1.
