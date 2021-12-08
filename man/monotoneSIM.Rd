@@ -14,7 +14,7 @@ monotoneSIM(
   monotone = TRUE,
   iter.HMC = 10,
   sigma.sq.beta = 1,
-  sigma.sq.eps = 1,
+  sigma.sq.eps.init = 1,
   a.eps = 1,
   b.eps = 1,
   Burn.in = 100,
@@ -36,19 +36,19 @@ monotoneSIM(
 
 \item{monotone}{Logical; Takes \code{TRUE} by default. If \code{TRUE}, the link function is taken to be monotone and the posterior of xi is drawn from a Truncated Normal distribution by an exact Hamiltonian Monte Carlo algorithm. If \code{FALSE},  the posterior of xi is drawn from a Normal distribution.}
 
-\item{iter.HMC}{Number of iterations of the Hamiltonian Monte Carlo algorithm in Truncated Normal sampling if \code{monotone = TRUE}. Takes the value \eqn{10} by default.}
+\item{iter.HMC}{Positive integer; Number of iterations of the Hamiltonian Monte Carlo algorithm in Truncated Normal sampling if \code{monotone = TRUE}. Takes the value \eqn{10} by default.}
 
 \item{sigma.sq.beta}{Scalar; Hyperparameter specifying prior Variance of beta. Takes the value \eqn{1} by default.}
 
-\item{sigma.sq.eps}{Scalar; Starting of Error Variance. Takes the value \eqn{1} by default.}
+\item{sigma.sq.eps.init}{Scalar; Starting value of Error Variance. Takes the value \eqn{1} by default.}
 
 \item{a.eps}{Scalar; Hyperparameter specifying prior distirbution of sigma.sq.eps. Takes the value \eqn{1} by default.}
 
 \item{b.eps}{Scalar; Hyperparameter specifying prior distirbution of sigma.sq.eps. Takes the value \eqn{1} by default.}
 
-\item{Burn.in}{Non-negative Integer; Burn-in period of the Markov Chain Monte Carlo algorithm. Takes the value \eqn{100} by default.}
+\item{Burn.in}{Non-negative integer; Burn-in period of the Markov Chain Monte Carlo algorithm. Takes the value \eqn{100} by default.}
 
-\item{M}{Positive Integer; required size of the  Markov Chain Monte Carlo sample. Takes the value \eqn{1000} by default.}
+\item{M}{Positive integer; Required size of the  Markov Chain Monte Carlo sample. Takes the value \eqn{1000} by default.}
 }
 \value{
 A list with the following elements.
@@ -88,7 +88,7 @@ y.true = true.g(X\%*\%true.beta) + rnorm(n, 0, sqrt(sigma.sq.eps.start))
 
 MCMC.sample = monotoneSIM(y = y.true, X = X, beta.init = beta.start,
   xi.init = xi, Sigma.xi =  S_xi, monotone = TRUE,
-  sigma.sq.eps = sigma.sq.eps.start, Burn.in = 100, M = 500)
+  sigma.sq.eps.init = sigma.sq.eps.start, Burn.in = 100, M = 500)
 
 #Posterior mean of beta
 beta.estimated = colMeans(MCMC.sample$beta); beta.estimated

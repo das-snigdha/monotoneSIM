@@ -14,19 +14,19 @@
 #'
 #' @param monotone  Logical; Takes \code{TRUE} by default. If \code{TRUE}, the link function is taken to be monotone and the posterior of xi is drawn from a Truncated Normal distribution by an exact Hamiltonian Monte Carlo algorithm. If \code{FALSE},  the posterior of xi is drawn from a Normal distribution.
 #'
-#' @param iter.HMC  Number of iterations of the Hamiltonian Monte Carlo algorithm in Truncated Normal sampling if \code{monotone = TRUE}. Takes the value \eqn{10} by default.
+#' @param iter.HMC  Positive integer; Number of iterations of the Hamiltonian Monte Carlo algorithm in Truncated Normal sampling if \code{monotone = TRUE}. Takes the value \eqn{10} by default.
 #'
 #' @param sigma.sq.beta Scalar; Hyperparameter specifying prior Variance of beta. Takes the value \eqn{1} by default.
 #'
-#' @param sigma.sq.eps  Scalar; Starting of Error Variance. Takes the value \eqn{1} by default.
+#' @param sigma.sq.eps.init  Scalar; Starting value of Error Variance. Takes the value \eqn{1} by default.
 #'
 #' @param a.eps Scalar; Hyperparameter specifying prior distirbution of sigma.sq.eps. Takes the value \eqn{1} by default.
 #'
 #' @param b.eps Scalar; Hyperparameter specifying prior distirbution of sigma.sq.eps. Takes the value \eqn{1} by default.
 #'
-#' @param Burn.in Non-negative Integer; Burn-in period of the Markov Chain Monte Carlo algorithm. Takes the value \eqn{100} by default.
+#' @param Burn.in Non-negative integer; Burn-in period of the Markov Chain Monte Carlo algorithm. Takes the value \eqn{100} by default.
 #'
-#' @param M Positive Integer; required size of the  Markov Chain Monte Carlo sample. Takes the value \eqn{1000} by default.
+#' @param M Positive integer; Required size of the  Markov Chain Monte Carlo sample. Takes the value \eqn{1000} by default.
 #'
 #' @return A list with the following elements.
 #' \item{xi}{ \code{M} \eqn{x (L+1)} Matrix of Basis Coefficients. Each row represent one sample from the Conditional posterior of basis coefficients.}
@@ -63,7 +63,7 @@
 #'
 #' MCMC.sample = monotoneSIM(y = y.true, X = X, beta.init = beta.start,
 #'   xi.init = xi, Sigma.xi =  S_xi, monotone = TRUE,
-#'   sigma.sq.eps = sigma.sq.eps.start, Burn.in = 100, M = 500)
+#'   sigma.sq.eps.init = sigma.sq.eps.start, Burn.in = 100, M = 500)
 #'
 #' #Posterior mean of beta
 #' beta.estimated = colMeans(MCMC.sample$beta); beta.estimated
@@ -73,7 +73,7 @@
 #' sd.beta = apply(MCMC.sample$beta, 2, sd); sd.beta
 
 monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monotone = TRUE, iter.HMC = 10,
-                       sigma.sq.beta = 1, sigma.sq.eps = 1, a.eps = 1.0, b.eps = 1.0,
+                       sigma.sq.beta = 1, sigma.sq.eps.init = 1, a.eps = 1.0, b.eps = 1.0,
                        Burn.in = 100, M = 1000){
 
   # Convert y, beta.init and xi.init into vectors
@@ -143,7 +143,7 @@ monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monoton
     stop("Hyperparameter specifying prior variance of beta should be positive.")
   }
   # Check if Starting value of error variance is positive
-  if(sigma.sq.eps <= 0){
+  if(sigma.sq.eps.init <= 0){
     stop("Starting value of error variance should be positive.")
   }
 
@@ -161,7 +161,7 @@ monotoneSIM = function(y, X, beta.init, xi.init, Sigma.xi, knots = NULL, monoton
 
   # Call C++ function monotoneSIM_c to perform an MCMC algorithm to get samples from the posterior distribution of xi, beta and sigma_sq
   out = monotoneSIM_c(y, X.std, beta.std, xi.init, Sigma.xi, knots, monotone, iter.HMC, sigma.sq.beta,
-                      sigma.sq.eps, a.eps, b.eps, Burn.in, M)
+                      sigma.sq.eps.init, a.eps, b.eps, Burn.in, M)
 
   # Back scale beta corresponding to the original covariates
   beta.backscaled = t( t(out$beta) / weights.beta )
