@@ -154,7 +154,7 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
   // Set the starting values of beta, beta_tilde and Xbeta = X * beta
   vec_copy(beta_init, beta) ;
   beta_tilde = sqrt((double)p*sigma_sq_beta)*beta ;
-  product(X, beta, Xbeta) ;
+  product_vec(X, beta, Xbeta) ;
 
   // Perform Elliptical Slice Sampling Algorithm
 
@@ -177,7 +177,7 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
   // Draw a new beta_tilde from the ellipse passing through current beta_tilde and nu
   beta_tilde_new = cos(theta)*beta_tilde + sin(theta)*nu ;
   beta_new = beta_tilde_new / norm(beta_tilde_new) ;    // beta_new with unit norm
-  product(X, beta_new, Xbeta_new) ;
+  product_vec(X, beta_new, Xbeta_new) ;
 
   // If Log_L(beta_new) > log y, accept the value
   // Else draw a new observation from the slice
@@ -189,7 +189,7 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
     theta = (theta_max-theta_min)*runif(1)[0] + theta_min ;   // shrink the bracket
     beta_tilde_new = cos(theta)*beta_tilde + sin(theta)*nu ;  // try a new slice
     beta_new = beta_tilde_new / norm(beta_tilde_new) ;
-    product(X, beta_new, Xbeta_new) ;
+    product_vec(X, beta_new, Xbeta_new) ;
   }
 
   // Set beta, beta_tilde and Xbeta as the final values obtained from the algorithm
@@ -223,7 +223,7 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
   transpose(Sigma_chol_U, Sigma_chol_L) ;
 
   // x = (Sigma_chol_L)^-1 (x_init-mu) ~ d-variate Normal(0, I_d)
-  product(solve(Sigma_chol_L), x_init-mu, x) ;
+  product_vec(solve(Sigma_chol_L), x_init-mu, x) ;
 
   // Adjust the constraints on x_init to apply them on x
   for(int j=0; j<m; j++){
@@ -344,7 +344,7 @@ NumericVector update_xi(const NumericVector& y, const NumericVector& Xbeta, cons
     }
   }
   AtA(Psi, PsiPsi) ;    //PsiPsi = Psi^{\top}*Psi
-  solve(Sigma_xi, Omega_xi) ;   //Omega_xi = Sigma_xi^(-1)
+  solve_store(Sigma_xi, Omega_xi) ;   //Omega_xi = Sigma_xi^(-1)
 
   // Defining the constraints of xi. Here xi follows a truncated Normal distribution N_+(0, Sigma_xi).
   // i.e. xi_l >= 0 for all l i.e. <F_l,xi_l> + g_l = 0
@@ -355,11 +355,11 @@ NumericVector update_xi(const NumericVector& y, const NumericVector& Xbeta, cons
   // Posterior variance of xi is B_xi = [Omega_xi + (Psi^\top Psi)/sigma_sq_eps]^(-1)
   product(PsiPsi, 1.0/sigma_sq_eps, B_xi) ; // B_xi: temporary mtx
   sum(B_xi, Omega_xi, B_xi_inv) ;
-  solve(B_xi_inv, B_xi) ;
+  solve_store(B_xi_inv, B_xi) ;
 
   // Posterior mean of xi is nu_xi = (B_xi Psi^\top y)/ sigma_sq_eps
   Atx(Psi, y, tmp_L) ;
-  product(B_xi, tmp_L, nu_xi) ;
+  product_vec(B_xi, tmp_L, nu_xi) ;
   for(int l=0; l<L+1; l++)
     nu_xi[l] /= sigma_sq_eps ;
 
@@ -428,7 +428,7 @@ List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const Numeric
   // Copy the initial provided values of xi, beta and sigma_sq_eps and calculate Xbeta
   vec_copy(xi_init, xi) ;
   vec_copy(beta_init, beta) ;
-  product(X, beta, Xbeta) ;
+  product_vec(X, beta, Xbeta) ;
   sigma_sq_eps = sigma_sq_eps_init ;
 
   // MCMC algorithm

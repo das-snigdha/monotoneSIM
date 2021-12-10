@@ -19,19 +19,8 @@ double norm(NumericVector x, int p=2, bool power=false){
     return(pow(res, 1.0/(double)p)) ;   // otherwise return (\sum |x_i|^p)^(1/p)
 }
 
-// Calculate the product of 2 numeric matrices and store it in "res" matrix passed as an argument
-void product(NumericMatrix A, NumericMatrix B, NumericMatrix res){
-  for(int i=0; i<A.nrow(); i++)	{
-    for(int j=0; j<B.ncol(); j++)	{
-      res(i,j) = 0.0 ;
-      for(int k=0; k<A.ncol(); k++)
-        res(i,j) += A(i,k)*B(k,j) ;   // perform matrix multiplication
-    }
-  }
-}
-
 // Multiply a matrix with a vector and store it in "res" vector passed as an argument
-void product(NumericMatrix A, NumericVector x, NumericVector res){
+void product_vec(NumericMatrix A, NumericVector x, NumericVector res){
 for(int i=0; i<A.nrow(); i++)	{
   res[i] = 0.0 ;
   for(int j=0; j<A.ncol(); j++)
@@ -63,7 +52,7 @@ void chol(NumericMatrix A, NumericMatrix res){
 }
 
 // Calculate the inverse of a matrix and store in a matrix passed as an argument
-void solve(NumericMatrix A, NumericMatrix A_inv){
+void solve_store(NumericMatrix A, NumericMatrix A_inv){
   arma::mat tmp = as<arma::mat>(A).i() ;
 
   for(int i=0; i<A.nrow(); i++)
