@@ -1,23 +1,33 @@
 ---
 title: "Bayesian Estimation of Monotone Single Index Models"
+author: "Snigdha Das"
 output: 
-  pdf_document: default
   github_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Description and Intended Functionality
+## Overview
 
-This package intends to perform a Markov Chain Monte Carlo algorithm to estimate a monotone Single index models of the form: 
+The package `monotoneSIM` performs Bayesian estimation using B-Spline basis approximation of a Single Index Model where the unknown link function is assumed to be monotonically increasing. 
+Consider a Single index models of the form: 
 $$y = g(x^{\top} \beta) + \epsilon$$
 
 where $y$: response, $x$: p-dimensional predictors, $\beta$: p-dimensional coefficient vector,  $\epsilon$: independent N($0,\ \sigma_\epsilon^2$) random errors, $g$: unknown monotone link function. 
 To construct a prior on $g$, we consider the basis expansion: $g(x) = \Sigma^{L}_{l=0} \, \xi_l \, \psi_l(x)$, where $\psi_l(x) = \int^{x}_{-1} h_l(t)\,\text{d}t$ , $h_l$ is a B-Spline basis function of order 2. Then, $g$ is monotonically increasing if and only if $\xi_l \geq 0 \ \forall \ l$, thereby enforcing the monotonicity constraint in an equivalent way. 
 
-The `monotoneSIM` function rescales the covariates and $\beta$ so that $|x^{\top} \beta| \leq 1$. Then an MCMC algorithm is performed to generate samples from the conditional posteriors of the unknown parameters, $\xi,\ \beta,\ \sigma_\epsilon^2$. The obtained sample of $\beta$ is back-scaled to get $\beta$ corresponding to the original covariates. The function also returns the estimated monotone function $g$ for a grid of x values based on $\xi$ obtained from the algorithm.
+Note: Here $g(x) = 0$, when $x \le -1$ and $g(x) = g(1)$, when $x \ge 1$. The matrix of predictors is scaled so that every row has euclidean norm $\le 1$ and euclidean norm of $\beta$ is taken to be 1 so that $|x^\top \beta| \le 1$.
+
+## Functionality
+
+The package provides two functions.
+
+* The main function `monotoneSIM` performs a Markov Chain Monte Carlo algorithm to generate samples from the conditional posterior distribution of unknown parameters in a monotone Single Index Model - the unknown parameters being B-Spline basis coefficients that approximate the unknown link function, the single index parameter and the error variance of the model.
+
+* The other function `monotoneFIT` calculates fitted values of the response using posterior mean of the single index parameter after generating an MCMC sample using the function `monotoneSIM`. It also returns the estimated link function of the model based on basis coefficients for a grid of supplied values.
 
 ## Installation
 
@@ -26,7 +36,31 @@ To install this package from Github, run the following in your R console:
 devtools::install_github("das-snigdha/monotoneSIM")
 ```
 
-## To Do
+## An Example Demonstrating Usage 
+
+This package shall be implemented on the following simulated data.
+
+We take two continuous variables and one dichotomous attribute as predictors.
+```{r echo = TRUE, eval = TRUE}
+n = 100; p = 3;
+X = matrix(rnorm(n*(p-1)), nrow = n, ncol = (p-1))
+X = cbind(X, rbinom(n, 1, 0.5))
+
+```
+
+Let the true monotone link function be : $$ g(x) = 5 \bigg[ F((x+1)/2) - F(0) \bigg] ,-1 \le x \le 1.$$
+
+```{r echo = TRUE, eval = FALSE}
+# True monotone link function
+true.g = function(x){
+  y = (x+1)/2
+  5*(pnorm(y, mean=0.5, sd=0.1) - pnorm(0, mean = 0.5, sd = 0.1))
+}
+plot(true.g, xlim = c(-1,1))
+
+```
+
+Clearly g(.) is monotone increasing and $g(-1) = 0$.
 
 The following tasks shall be performed during the remaining of the semester:
 
