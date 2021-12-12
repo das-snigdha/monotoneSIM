@@ -5,7 +5,7 @@ Authors@R:
     person("Snigdha", "Das",
     email = "snigdha@stat.tamu.edu",
     role = c("aut", "cre"))
-Description: The package performs Bayesian estimation using B-Spline basis approximation of a Single Index Model where the unknown link function is assumed to be monotonically increasing. The monotone link function is expressed as a B-Spline basis expansion, and its monotonicity is equivalently enforced by non-negativity of the basis coefficients. Appropriate priors are constructed on the of the unknown parameters - the B-Spline basis coefficients, the single index parameter and the error variance of the model. A Markov Chain Monte Carlo algorithm is performed to generate samples from their conditional posterior distributions. Fitted values of the response are obtained using posterior mean of the single index parameter and the link function is estimated for a grid of supplied values.
+Description: The package performs Bayesian estimation using B-Spline basis approximation of a Single Index Model where the unknown link function is assumed to be monotonically increasing. The monotone link function is expressed as a B-Spline basis expansion, and its monotonicity is equivalently enforced by non-negativity of the basis coefficients. Appropriate priors are constructed on the unknown parameters - the B-Spline basis coefficients, the single index parameter and the error variance of the model. A Markov Chain Monte Carlo algorithm is performed to generate samples from their conditional posterior distributions. Fitted values of the response are obtained using posterior mean of the single index parameter and the link function is estimated for a grid of supplied values.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
@@ -15,4 +15,5 @@ LinkingTo:
     Rcpp,
     RcppArmadillo
 Imports: 
+    stats,
     Rcpp
