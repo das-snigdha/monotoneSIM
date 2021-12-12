@@ -154,7 +154,7 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
   // Set the starting values of beta, beta_tilde and Xbeta = X * beta
   vec_copy(beta_init, beta) ;
   beta_tilde = sqrt((double)p*sigma_sq_beta)*beta ;
-  product_vec(X, beta, Xbeta) ;
+  product_vec_c(X, beta, Xbeta) ;
 
   // Perform Elliptical Slice Sampling Algorithm
 
@@ -176,8 +176,8 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
 
   // Draw a new beta_tilde from the ellipse passing through current beta_tilde and nu
   beta_tilde_new = cos(theta)*beta_tilde + sin(theta)*nu ;
-  beta_new = beta_tilde_new / norm(beta_tilde_new) ;    // beta_new with unit norm
-  product_vec(X, beta_new, Xbeta_new) ;
+  beta_new = beta_tilde_new / norm_c(beta_tilde_new) ;    // beta_new with unit norm
+  product_vec_c(X, beta_new, Xbeta_new) ;
 
   // If Log_L(beta_new) > log y, accept the value
   // Else draw a new observation from the slice
@@ -188,8 +188,8 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
       theta_max = theta ;
     theta = (theta_max-theta_min)*runif(1)[0] + theta_min ;   // shrink the bracket
     beta_tilde_new = cos(theta)*beta_tilde + sin(theta)*nu ;  // try a new slice
-    beta_new = beta_tilde_new / norm(beta_tilde_new) ;
-    product_vec(X, beta_new, Xbeta_new) ;
+    beta_new = beta_tilde_new / norm_c(beta_tilde_new) ;
+    product_vec_c(X, beta_new, Xbeta_new) ;
   }
 
   // Set beta, beta_tilde and Xbeta as the final values obtained from the algorithm
@@ -219,17 +219,17 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
   NumericMatrix f(m,d), res(n,d), Sigma_chol_L(d,d), Sigma_chol_U(d,d) ;
 
   // Sigma = Sigma_col_L * Sigma_col_U by Cholesky Decomposition
-  chol(Sigma, Sigma_chol_U) ;
-  transpose(Sigma_chol_U, Sigma_chol_L) ;
+  chol_c(Sigma, Sigma_chol_U) ;
+  transpose_c(Sigma_chol_U, Sigma_chol_L) ;
 
   // x = (Sigma_chol_L)^-1 (x_init-mu) ~ d-variate Normal(0, I_d)
-  product_vec(solve(Sigma_chol_L), x_init-mu, x) ;
+  product_vec_c(solve_c(Sigma_chol_L), x_init-mu, x) ;
 
   // Adjust the constraints on x_init to apply them on x
   for(int j=0; j<m; j++){
-    g[j] = innerProduct(ff(j,_), mu) + gg[j] ;
+    g[j] = innerProduct_c(ff(j,_), mu) + gg[j] ;
     for(int i=0; i<d; i++)
-      f(j,i) = innerProduct(Sigma_chol_U(i,_), ff(j,_)) ;
+      f(j,i) = innerProduct_c(Sigma_chol_U(i,_), ff(j,_)) ;
   }
 
   // Perform the HMC algorithm
@@ -245,8 +245,8 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
       for(int j=0; j<m; j++){
 
         // u = sqrt((<f_j,a>)^2 + (<f_j,b>)^2)
-        tmp = innerProduct(f(j,_), a) ;
-        tmp2 = innerProduct(f(j,_), b) ;
+        tmp = innerProduct_c(f(j,_), a) ;
+        tmp2 = innerProduct_c(f(j,_), b) ;
         u = sqrt(tmp*tmp + tmp2*tmp2) ;
 
         // phi = tan^-1 (-tmp/tmp2)
@@ -287,7 +287,7 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
         }
 
         // set a_i as the reflected velocity at time T_h
-        alpha_h = innerProduct(f(h,_), x_dot) / norm(f(h,_),2,true) ;
+        alpha_h = innerProduct_c(f(h,_), x_dot) / norm_c(f(h,_),2,true) ;
         for(int i=0; i<d; i++)
           a[i] = x_dot[i] - 2.0*alpha_h*f(h,i) ;
 
@@ -312,7 +312,7 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
     // Store samples after burn-in period
     if(nn >= n_burn)
       for(int i=0; i<d; i++)
-        res(nn-n_burn,i) = innerProduct(Sigma_chol_L(i,_), x) + mu[i] ;
+        res(nn-n_burn,i) = innerProduct_c(Sigma_chol_L(i,_), x) + mu[i] ;
     // Obtained x is a sample from truncated Normal(0, I_d)
     // Transform it to get the required truncated Normal(mu, Sigma)
   }
@@ -343,8 +343,8 @@ NumericVector update_xi(const NumericVector& y, const NumericVector& Xbeta, cons
       Psi(i,l) = psi_l(Xbeta[i], l, u) ;
     }
   }
-  AtA(Psi, PsiPsi) ;    //PsiPsi = Psi^{\top}*Psi
-  solve_store(Sigma_xi, Omega_xi) ;   //Omega_xi = Sigma_xi^(-1)
+  AtA_c(Psi, PsiPsi) ;    //PsiPsi = Psi^{\top}*Psi
+  solve_store_c(Sigma_xi, Omega_xi) ;   //Omega_xi = Sigma_xi^(-1)
 
   // Defining the constraints of xi. Here xi follows a truncated Normal distribution N_+(0, Sigma_xi).
   // i.e. xi_l >= 0 for all l i.e. <F_l,xi_l> + g_l = 0
@@ -353,20 +353,20 @@ NumericVector update_xi(const NumericVector& y, const NumericVector& Xbeta, cons
     ff(l,l) = 1.0 ;
 
   // Posterior variance of xi is B_xi = [Omega_xi + (Psi^\top Psi)/sigma_sq_eps]^(-1)
-  product(PsiPsi, 1.0/sigma_sq_eps, B_xi) ; // B_xi: temporary mtx
-  sum(B_xi, Omega_xi, B_xi_inv) ;
-  solve_store(B_xi_inv, B_xi) ;
+  product_c(PsiPsi, 1.0/sigma_sq_eps, B_xi) ; // B_xi: temporary mtx
+  sum_c(B_xi, Omega_xi, B_xi_inv) ;
+  solve_store_c(B_xi_inv, B_xi) ;
 
   // Posterior mean of xi is nu_xi = (B_xi Psi^\top y)/ sigma_sq_eps
-  Atx(Psi, y, tmp_L) ;
-  product_vec(B_xi, tmp_L, nu_xi) ;
+  Atx_c(Psi, y, tmp_L) ;
+  product_vec_c(B_xi, tmp_L, nu_xi) ;
   for(int l=0; l<L+1; l++)
     nu_xi[l] /= sigma_sq_eps ;
 
   // if g is not monotone, then xi's need not be non negative.
   // then draw xi from Normal distribution with mean = nu_xi and variance = B_xi
   if(monotone==false){
-    rmvnorm(nu_xi, B_xi, xi) ;
+    rmvnorm_c(nu_xi, B_xi, xi) ;
   }
   else{
     // if g is monotone, then xi_l >= 0 for all l
@@ -394,7 +394,7 @@ double update_sigma_sq_eps(const NumericVector& y, const NumericVector& Xbeta, c
     eps[i] = y[i] - g(Xbeta[i], xi, u) ;
   }
   // sigma_sq_eps ~ Inv Gamma (a_eps + n/2, 1/(b_eps + (eps^\top eps)/2))
-  double sigma_sq_eps = 1.0/rgamma(1, a_eps+0.5*n, 1.0/(b_eps + 0.5*innerProduct(eps,eps)))[0] ;
+  double sigma_sq_eps = 1.0/rgamma(1, a_eps+0.5*n, 1.0/(b_eps + 0.5*innerProduct_c(eps,eps)))[0] ;
   return(sigma_sq_eps);
 }
 
@@ -428,7 +428,7 @@ List monotoneSIM_c(const NumericVector& y, const NumericMatrix& X, const Numeric
   // Copy the initial provided values of xi, beta and sigma_sq_eps and calculate Xbeta
   vec_copy(xi_init, xi) ;
   vec_copy(beta_init, beta) ;
-  product_vec(X, beta, Xbeta) ;
+  product_vec_c(X, beta, Xbeta) ;
   sigma_sq_eps = sigma_sq_eps_init ;
 
   // MCMC algorithm
