@@ -7,7 +7,7 @@ Snigdha Das
 The package `monotoneSIM` performs Bayesian estimation using B-Spline
 basis approximation of a Single Index Model where the unknown link
 function is assumed to be monotonically increasing. Consider a Single
-index models of the form:
+index model of the form:
 *y* = *g*(*x*<sup>⊤</sup>*β*) + *ϵ*
 
 where *y*: response, *x*: p-dimensional predictors, *β*: p-dimensional
@@ -49,6 +49,7 @@ To install this package from Github, run the following in your R
 console:
 
 ``` r
+# install.packages("devtools")
 devtools::install_github("das-snigdha/monotoneSIM")
 ```
 
@@ -98,24 +99,21 @@ single index parameter *β* can be estimated using the posterior mean of
 the MCMC sample on *β*, as shown below:
 
 ``` r
-#Posterior mean of beta
-beta.estimated = colMeans(MCMC.sample$beta); beta.estimated
+#Posterior sample mean of beta
+beta.estimated = colMeans(MCMC.sample$beta); 
+beta.estimated ; true.beta  # Compare estimated beta with true beta
 ```
 
-    ## [1] 0.99237389 0.00596425 0.12158470
+    ## [1] -0.7440989  0.1081794  0.6591941
 
-``` r
-true.beta  #Compare with true beta
-```
-
-    ## [1] 0.99041581 0.01477206 0.13732559
+    ## [1] -0.7410998  0.1049613  0.6631397
 
 ``` r
 #Posterior Standard Deviation of beta
 sd.beta = apply(MCMC.sample$beta, 2, sd); sd.beta
 ```
 
-    ## [1] 0.002069747 0.009242075 0.016932202
+    ## [1] 0.005109261 0.004235988 0.005772295
 
 Once the MCMC sample has been obtained, the function `monotoneFIT` is
 used to extract fitted values of the response and to estimate the link
@@ -132,7 +130,7 @@ Having obtained the fitted responses, the Mean Sqaured Error may be
 calculated to comment on the goodness of fit or one may graphically
 visualize the true response and the fitted model as shown below:
 
-    ## [1] "MSE =  0.0382548781184165"
+    ## [1] "MSE =  0.0196721988164609"
 
 ![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
@@ -144,6 +142,6 @@ est.func = colMeans(fit$link.estimated)
 ```
 
 One can graphically look at the functional form of the the estimated
-link function by plotting it againt `grid.x`
+link function by plotting it against `grid.x`
 
 ![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
