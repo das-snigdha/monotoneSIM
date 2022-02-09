@@ -168,10 +168,10 @@ List update_beta(const NumericVector& y, const NumericMatrix& X, const NumericVe
   log_y = log_L(y, Xbeta, xi, sigma_sq_eps, u) + log(uu) ;
 
   // Draw theta from Uniform(0, 2PI)
-  theta = 2.0*PI*runif(1)[0] ;
+  theta = 2.0*M_PI*runif(1)[0] ;
 
   // Shrink the bracket of drawing theta
-  theta_min = theta - 2.0*PI ;
+  theta_min = theta - 2.0*M_PI ;
   theta_max = theta ;
 
   // Draw a new beta_tilde from the ellipse passing through current beta_tilde and nu
@@ -239,7 +239,7 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
     vec_copy(s, a) ;   // a = s
     vec_copy(x, b) ;   // b = s
 
-    T_end = PI/2.0 ;    // T_end = PI/2, end time point
+    T_end = M_PI/2.0 ;    // T_end = PI/2, end time point
 
     while(1){
       for(int j=0; j<m; j++){
@@ -259,7 +259,7 @@ NumericMatrix rtmvnormHMC(int n, const NumericVector& mu, const NumericMatrix& S
           // u * cos(T_j + phi) + g_j = 0
           T[j] = acos(-1.0*g[j]/u) - phi ;
           if(T[j] < 0.0){
-            T[j] += 2.0*PI ;
+            T[j] += 2.0*M_PI ;
             // Rprintf("1\n") ;
           }
         }
